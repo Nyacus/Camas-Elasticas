@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>12 Temporizadores</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: rgb(237, 237, 237);
+    font-family: 'Roboto', sans-serif;
+  }
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) 10px repeat(3, 1fr);
+    grid-template-rows: repeat(1, 1fr) 10px repeat(1, 1fr);
+    height: 85vh;
+    width: 100vw;
+    gap: 8px;
+    padding: 20px;
+  }
+  .timer {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 8%;
+    font-size: 2.5em;
+    background-color: #FFF;
+    border: 2px solid #000;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    border-radius: 20px;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+  }
+  .indicator {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+  }
+  .indicator .material-symbols-outlined {
+    font-size: 38px;
+  }
+  .indicator i {
+    font-size: 36px;
+    vertical-align: middle;
+  }
+  .timer-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    color: black;
+    pointer-events: none;
+  }
+  .flashback-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 36px;
+    color: rgba(0, 0, 0,0.15);
+    pointer-events: none;
+  }
+  .timer[data-timer-id="1"] { grid-column: 1; grid-row: 1; }
+  .timer[data-timer-id="2"] { grid-column: 2; grid-row: 1; }
+  .timer[data-timer-id="3"] { grid-column: 3; grid-row: 1; }
+  .timer[data-timer-id="4"] { grid-column: 5; grid-row: 1; }
+  .timer[data-timer-id="5"] { grid-column: 6; grid-row: 1; }
+  .timer[data-timer-id="6"] { grid-column: 7; grid-row: 1; }
+  .timer[data-timer-id="7"] { grid-column: 1; grid-row: 3; }
+  .timer[data-timer-id="8"] { grid-column: 2; grid-row: 3; }
+  .timer[data-timer-id="9"] { grid-column: 3; grid-row: 3; }
+  .timer[data-timer-id="10"] { grid-column: 5; grid-row: 3; }
+  .timer[data-timer-id="11"] { grid-column: 6; grid-row: 3; }
+  .timer[data-timer-id="12"] { grid-column: 7; grid-row: 3; }
+  .inactive {
+    background-color: transparent;
+  }
+  @keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(3deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-3deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .shaking {
+    animation: shake 150ms infinite;
+  }
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 16px; /* separa el contenido del borde */
+  }
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: min(90vw, 360px);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+  }
+  .modal-content ul {
+    list-style: none;
+    padding: 0;
+  }
+  .modal-content li {
+    padding: 15px 10px;
+    cursor: pointer;
+    font-size: 2.0em;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    background-color: #f5f5f5;
+    margin-bottom: 10px;
+    border-radius: 20px;
+  }
+  .modal-content li:hover {
+    background-color: #f0f0f0;
+  }
+  .modal-content li i {
+    font-size: 35px;
+    margin-right: 45px;
+    vertical-align: middle;
+    margin-left: 15px;
+    width: 40px;
+    text-align: center;
+  }
+  .modal-content li:active {
+    background-color: #e0e0e0;
+    border: 2px #000;
+  }
+  #modal-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #333;
+  }
+  .edit-modal-content {
+    background-color: white;
+    padding: 15px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: min(90vw, 360px);
+    height: auto;                 /* evita forzar altura fija */
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;               /* permite scroll interno si hiciera falta */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .time-display {
+    width: 100%;
+    height: 50px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    margin-bottom: 15px;
+    font-family: 'Roboto', sans-serif;
+  }
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+  .numpad button {
+    padding: 15px;
+    font-size: 1.5em;
+    background-color: #f5f5f5;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+  }
+  .numpad button:hover {
+    background-color: #f0f0f0;
+  }
+  .numpad button:active {
+    background-color: #e0e0e0;
+  }
+  .numpad .action-btn {
+    font-size: 1.2em;
+  }
+  .share-modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 400px;
+    text-align: center;
+    max-height: 90vh;
+    overflow: auto;
+  }
+  .share-modal-content p {
+    margin-bottom: 15px;
+    font-size: 1.2em;
+  }
+  .share-modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+  .share-modal-content button {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #f5f5f5;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 0 10px;
+  }
+  .share-modal-content button:hover {
+    background-color: #f0f0f0;
+  }
+  .share-modal-content button:active {
+    background-color: #e0e0e0;
+  }
+  .count-modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    text-align: center;
+    min-width: 300px;
+    min-height: 150px;
+    width: min(90vw, 380px);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+  }
+  #count-modal-title {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  .count-display-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #count-display {
+    font-size: 6em;
+    font-weight: 900;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+  }
+  #lollipop-icon {
+    display: none;
+    margin-right: 25px;
+  }
+  .lollipop-head {
+    width: 80px;
+    height: 80px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    border: 2px solid #ff0000;
+    box-shadow: inset 5px -5px 15px rgba(0,0,0,0.55);
+  }
+  .lollipop-stick {
+    width: 10px;
+    height: 75px;
+    background: rgb(230, 230, 230);
+    border: 0px solid #000;
+    margin: 0 auto;
+    border-top: none;
+  }
+  .count-display-green {
+    color: #28a745;
+  }
+
+  /* =============================== */
+  /* THEME A: Material Compact + Ripple (override final) */
+  :root{
+    --md-surface:#ffffff;
+    --md-on-surface:#1f1f1f;
+    --md-border:#E5E7EB;
+    --md-primary:#6750A4;
+    --md-state:rgba(103,80,164,0.08);
+  }
+  /* Limita y moderniza todos los contenedores de modal */
+  .modal{ padding:12px; }
+  .modal-content{
+    width:min(88vw,330px);
+    max-height:88vh; /* < 90% viewport */
+    background:var(--md-surface);
+    border:1px solid var(--md-border);
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+    padding:14px;
+  }
+  #modal-title{
+    font-size:1.8rem;
+    font-weight:800;
+    letter-spacing:.2px;
+    margin:4px 0 10px;
+    color:var(--md-on-surface);
+  }
+  .modal-content ul{ margin-top:4px; }
+  .modal-content li{
+    position:relative;
+    font-size:1.6rem;           /* más compacto */
+    padding:10px 12px;
+    margin-bottom:8px;
+    border-radius:12px;
+    background:#FAFAFA;
+    border:1px solid var(--md-border);
+    transition:transform .06s ease, background .15s ease, border-color .15s ease;
+    min-height:44px;             /* toque cómodo */
+  }
+  .modal-content li i{
+    font-size:24px;              /* icono más pequeño */
+    margin:0 30px 0 6px;
+    width:24px;
+    color:#5E5E5E;
+  }
+  .modal-content li:hover{
+    background:#F5F5F5;
+    border-color:#DADDE3;
+  }
+  .modal-content li:active{ transform:scale(.98); }
+  /* Ripple visual */
+  .modal-content li::after{
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(120px 120px at var(--x,50%) var(--y,50%), var(--md-state), transparent 60%);
+    opacity:0; transition:opacity .25s ease; border-radius:inherit;
+  }
+  .modal-content li:active::after{ opacity:1; }
+
+  /* Otros modales alineados al tema */
+  .edit-modal-content{
+    width:min(88vw,330px); max-height:88vh; padding:16px; border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.12); border:1px solid var(--md-border);
+    background:var(--md-surface);
+  }
+  .share-modal-content{
+    width:min(88vw,360px); max-height:88vh; border-radius:16px; padding:16px;
+    border:1px solid var(--md-border); box-shadow:0 10px 30px rgba(0,0,0,.12);
+    background:var(--md-surface);
+  }
+  .count-modal-content{
+    width:min(88vw,340px); max-height:88vh; border-radius:16px; padding:16px;
+    border:1px solid var(--md-border); box-shadow:0 10px 30px rgba(0,0,0,.12);
+    background:var(--md-surface);
+  }
+  .time-display{ height:48px; font-size:1.4rem; }
+  .numpad button{ padding:12px; font-size:1.15rem; }
+  .share-modal-content p{ font-size:1rem; }
+  .share-modal-content input{ padding:9px; }
+  .share-modal-content button{ padding:9px 14px; }
+  #count-display{ font-size:4.6rem; } /* reduce para respirar */
+
+  @media (max-width: 380px) {
+    #modal-title,
+    #count-modal-title { font-size: 1.1rem; }
+    .modal-content li { font-size: 0.98rem; padding: 9px 10px; }
+    .modal-content li i{ font-size:20px; width:20px; margin:0 10px 0 6px; }
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+<div class="grid-container">
+  <div class="timer" data-timer-id="1"></div>
+  <div class="timer" data-timer-id="2"></div>
+  <div class="timer" data-timer-id="3"></div>
+  <div class="timer" data-timer-id="4"></div>
+  <div class="timer" data-timer-id="5"></div>
+  <div class="timer" data-timer-id="6"></div>
+  <div class="timer" data-timer-id="7"></div>
+  <div class="timer" data-timer-id="8"></div>
+  <div class="timer" data-timer-id="9"></div>
+  <div class="timer" data-timer-id="10"></div>
+  <div class="timer" data-timer-id="11"></div>
+  <div class="timer" data-timer-id="12"></div>
+</div>
+
+<div id="timer-modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <h2 id="modal-title"></h2>
+    <ul>
+      <li data-action="swap"><i class="fas fa-exchange-alt"></i> Permutar</li>
+      <li data-action="flashback"><i class="fa-solid fa-backward-fast"></i> Flashback</li>
+      <li data-action="edit"><i class="fas fa-edit"></i> Editar</li>
+      <li data-action="share"><i class="fa-solid fa-arrow-up-from-bracket"></i> Compartir</li>
+      <li data-action="count"><i class="fa-solid fa-calculator"></i> Saltómetro</li>
+    </ul>
+  </div>
+</div>
+
+<div id="edit-modal" class="modal" style="display: none;">
+  <div class="edit-modal-content">
+    <div class="time-display" id="time-display">00:00</div>
+    <div class="numpad">
+      <button data-value="1">1</button>
+      <button data-value="2">2</button>
+      <button data-value="3">3</button>
+      <button data-value="4">4</button>
+      <button data-value="5">5</button>
+      <button data-value="6">6</button>
+      <button data-value="7">7</button>
+      <button data-value="8">8</button>
+      <button data-value="9">9</button>
+      <button class="action-btn" id="delete-btn"><i class="fas fa-backspace"></i></button>
+      <button data-value="0">0</button>
+      <button class="action-btn" id="accept-btn"><i class="fas fa-check"></i></button>
+    </div>
+  </div>
+</div>
+
+<div id="share-modal" class="modal" style="display: none;">
+  <div class="share-modal-content">
+    <p>Comparte este enlace:</p>
+    <input type="text" id="share-url" readonly>
+    <button id="copy-btn">Copiar</button>
+    <button id="close-share-btn">Cerrar</button>
+  </div>
+</div>
+
+<div id="count-modal" class="modal" style="display: none;">
+  <div class="count-modal-content">
+    <h2 id="count-modal-title"></h2>
+    <div class="count-display-container">
+      <div id="lollipop-icon">
+        <div class="lollipop-head"></div>
+        <div class="lollipop-stick"></div>
+      </div>
+      <div id="count-display">0</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let swapSource = null;
+const timers = {};
+let vibrationsEnabled = false;
+
+function vibrate() {
+  if (vibrationsEnabled && navigator.vibrate) {
+    navigator.vibrate([100, 50, 100]);
+  }
+}
+
+function saveTimersToLocalStorage() {
+  const timersToSave = {};
+  for (const id in timers) {
+    const timerCopy = { ...timers[id] };
+    delete timerCopy.element;
+    delete timerCopy.interval;
+    if (timerCopy.flashbackState) {}
+    timersToSave[id] = timerCopy;
+  }
+  localStorage.setItem('timers', JSON.stringify(timersToSave));
+}
+
+function loadTimersFromLocalStorage() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedState = urlParams.get('timers');
+
+  let source = null;
+  if (sharedState) {
+      try {
+          source = JSON.parse(decodeURIComponent(sharedState));
+      } catch (e) {
+          console.error('Error al cargar estado compartido:', e);
+      }
+  }
+  
+  if (!source) {
+      source = JSON.parse(localStorage.getItem('timers'));
+  }
+
+  if (source) {
+      for (const id in source) {
+          if (timers[id]) {
+              Object.assign(timers[id], source[id]);
+              updateTimerDisplay(id);
+              if (timers[id].state === 'counting') {
+                  startTimerInterval(id);
+              }
+          }
+      }
+  }
+}
+
+function startTimerInterval(id) {
+  const timer = timers[id];
+  if (timer.interval) clearInterval(timer.interval);
+
+  function updateTimer() {
+    const elapsed = Math.floor((Date.now() - timer.startTime) / 1000);
+    const remaining = timer.initialDuration - elapsed;
+
+    if (remaining > 0) {
+      // Descendente (verde)
+      timer.ascending = false;
+      timer.time = remaining;
+    } else {
+      // Ascendente (rojo)
+      timer.ascending = true;
+      timer.time = Math.abs(remaining) + 1;
+    }
+
+    updateTimerDisplay(id);
+    saveTimersToLocalStorage();
+  }
+
+  timer.interval = setInterval(updateTimer, 1000);
+  updateTimer();
+}
+
+document.querySelectorAll('.timer').forEach(timerEl => {
+  timerEl.addEventListener('contextmenu', e => e.preventDefault());
+  const id = timerEl.dataset.timerId;
+  timers[id] = {
+    element: timerEl,
+    state: 'idle',
+    time: 600,
+    initialDuration: 600,
+    interval: null,
+    ascending: false,
+    pressTimerMedium: null,
+    pressTimerLong: null,
+    pressActionTaken: false,
+    lastClickTime: 0,
+    clickCount: 0,
+    doubleClickTimer: null,
+    startTime: null,
+    flashbackState: null,
+    isShowingFlashback: false
+  };
+  timerEl.addEventListener('mousedown', e => handlePressStart(e, id));
+  timerEl.addEventListener('mouseup', e => handlePressEnd(e, id));
+  timerEl.addEventListener('touchstart', e => handlePressStart(e, id));
+  timerEl.addEventListener('touchend', e => handlePressEnd(e, id));
+});
+
+window.onload = () => {
+    loadTimersFromLocalStorage();
+    document.querySelectorAll('.timer').forEach(timerEl => {
+        const id = timerEl.dataset.timerId;
+        if(timers[id] && !timerEl.hasChildNodes()){
+            updateTimerDisplay(id);
+        }
+    });
+};
+
+// ===================================================================
+// ========= INICIO DE LA SECCIÓN MODIFICADA =========================
+// ===================================================================
+function handlePressStart(e, id) {
+  e.preventDefault();
+  const timer = timers[id];
+  timer.pressTarget = e.target;
+  timer.pressActionTaken = false;
+
+  const isIndicatorPress = timer.pressTarget.closest('.indicator');
+
+  // Lógica CORREGIDA para el cambio de duración cíclico
+  if (isIndicatorPress) {
+    if (timer.state === 'idle') return; // No se puede cambiar la duración si el temporizador está inactivo
+
+    // Un único temporizador: si dura >500ms se dispara, si es corto se gestiona en handlePressEnd
+    timer.pressTimerMedium = setTimeout(() => {
+      timer.pressActionTaken = true;
+      let newDuration;
+      
+      // Lógica cíclica: 10 -> 20 -> 30 -> 10
+      if (timer.initialDuration === 600) { // 10 min
+        newDuration = 1200; // 20 min
+      } else if (timer.initialDuration === 1200) { // 20 min
+        newDuration = 1800; // 30 min
+      } else { // 30 min (o cualquier otro valor)
+        newDuration = 600; // 10 min
+      }
+      setDuration(id, newDuration);
+    }, 500);
+    
+    return;
+  }
+
+  // Pulsación en el cuerpo del temporizador
+  if (timer.state === 'idle') {
+    timer.pressTimerMedium = setTimeout(() => {
+      timer.pressActionTaken = true;
+      startTimer(id, 1200);
+    }, 500);
+
+    timer.pressTimerLong = setTimeout(() => {
+      timer.pressActionTaken = true;
+      startTimer(id, 1800);
+    }, 1000);
+
+  } else {
+    timer.pressTimerMedium = setTimeout(() => {
+      timer.pressActionTaken = true;
+      showModal(id);
+    }, 500);
+  }
+}
+// ===================================================================
+// ========= FIN DE LA SECCIÓN MODIFICADA ============================
+// ===================================================================
+
+function handlePressEnd(e, id) {
+  const timer = timers[id];
+  const currentTime = Date.now();
+
+  clearTimeout(timer.pressTimerMedium);
+  clearTimeout(timer.pressTimerLong);
+
+  if (timer.pressActionTaken) {
+    return;
+  }
+
+  timer.clickCount++;
+
+  if (swapSource !== null) {
+    if (id === swapSource) {
+      cancelSwapMode();
+    } else {
+      completeSwap(swapSource, id);
+    }
+    timer.clickCount = 0;
+    if (timer.doubleClickTimer) clearTimeout(timer.doubleClickTimer);
+    return;
+  }
+
+  if (timer.clickCount === 1) {
+    timer.doubleClickTimer = setTimeout(() => {
+      if (timer.state === 'idle') {
+        startTimer(id, 600);
+      }
+      timer.clickCount = 0;
+      timer.lastClickTime = currentTime;
+      saveTimersToLocalStorage();
+      updateTimerDisplay(id);
+    }, 400);
+  } else if (timer.clickCount === 2) {
+    if (timer.doubleClickTimer) clearTimeout(timer.doubleClickTimer);
+    
+    timers[id].flashbackState = {
+        state: timer.state,
+        time: timer.time,
+        initialDuration: timer.initialDuration,
+        ascending: timer.ascending,
+        startTime: timer.startTime
+    };
+    timers[id].isShowingFlashback = false;
+
+    resetTimer(id, 600);
+    timer.clickCount = 0;
+    timer.lastClickTime = currentTime;
+    saveTimersToLocalStorage();
+    updateTimerDisplay(id);
+  }
+}
+
+function startTimer(id, duration) {
+  const timer = timers[id];
+  if (timer.interval) clearInterval(timer.interval);
+  timer.time = duration;
+  timer.initialDuration = duration;
+  timer.startTime = Date.now();
+  timer.ascending = false;
+  timer.state = 'counting';
+  timer.isShowingFlashback = false;
+  updateTimerDisplay(id);
+  startTimerInterval(id);
+}
+
+function resetTimer(id, duration) {
+  const timer = timers[id];
+  if (timer.interval) clearInterval(timer.interval);
+  timer.initialDuration = duration;
+  timer.startTime = Date.now();
+  timer.time = duration;
+  timer.ascending = false;
+  timer.state = 'idle';
+  timer.element.style.backgroundColor = '';
+  updateTimerDisplay(id);
+  saveTimersToLocalStorage();
+}
+
+// ====== FUNCIÓN MODIFICADA ======
+function setDuration(id, newDuration) {
+  const timer = timers[id];
+  timer.initialDuration = newDuration;
+
+  // Recalcular sentido y tiempo en función del nuevo objetivo
+  const elapsed = Math.floor((Date.now() - timer.startTime) / 1000);
+  const remaining = newDuration - elapsed;
+
+  if (remaining > 0) {
+    // Hay cuenta atrás pendiente → descendente (verde)
+    timer.ascending = false;
+    timer.time = remaining;
+  } else {
+    // Ya hemos rebasado el nuevo cero → ascendente (rojo)
+    timer.ascending = true;
+    timer.time = Math.abs(remaining) + 1; // mantenemos tu +1
+  }
+
+  updateTimerDisplay(id);
+  saveTimersToLocalStorage();
+}
+
+function updateTimerDisplay(id) {
+  const timer = timers[id];
+
+  if (timer.state === 'idle') {
+    timer.element.innerHTML = `<div class="timer-number">${id}</div>`;
+    timer.element.classList.add('inactive');
+    timer.element.style.backgroundColor = '';
+    return;
+  }
+
+  timer.element.classList.remove('inactive');
+  let minutes = Math.floor(Math.abs(timer.time) / 60);
+  let seconds = Math.abs(timer.time) % 60;
+  minutes = minutes.toString();
+  seconds = seconds.toString().padStart(2, "0");
+  
+  let timerHTML = `<span class="timeDigits">${minutes}:${seconds}</span>`;
+
+  if (timer.isShowingFlashback) {
+    timerHTML += `<div class="flashback-indicator"><i class="fa-solid fa-backward-fast"></i></div>`;
+  }
+  
+  timer.element.innerHTML = timerHTML;
+
+  let indicatorContainer = timer.element.querySelector('.indicator');
+  if (!indicatorContainer) {
+    timer.element.insertAdjacentHTML('beforeend', `<div class="indicator"></div>`);
+    indicatorContainer = timer.element.querySelector('.indicator');
+  }
+
+  let iconHTML = '';
+  if (timer.initialDuration === 600) { // 10 min
+    iconHTML = '<i class="fa-regular fa-clock" style="opacity: 0.15;"></i>';
+  } else if (timer.initialDuration === 1200) { // 20 min
+    iconHTML = '<i class="fa-regular fa-clock"></i>';
+  } else if (timer.initialDuration === 1800) { // 30 min
+    iconHTML = '<i class="fa-solid fa-clock"></i>';
+  }
+
+  indicatorContainer.innerHTML = iconHTML;
+
+  if (timer.state === 'counting') {
+    timer.element.style.backgroundColor = timer.ascending
+      ? 'rgba(255, 0, 0, 0.3)'
+      : 'rgba(0, 128, 0, 0.3)';
+  }
+}
+
+function enableSwapMode(timerId) {
+  swapSource = timerId;
+  for (const id in timers) {
+    if (id !== timerId) {
+      timers[id].element.classList.add('shaking');
+    }
+  }
+}
+
+function cancelSwapMode() {
+  for (const id in timers) {
+    timers[id].element.classList.remove('shaking');
+  }
+  swapSource = null;
+}
+
+function completeSwap(sourceId, targetId) {
+  const timerA = timers[sourceId];
+  const timerB = timers[targetId];
+  const properties = ["state", "time", "initialDuration", "ascending", "startTime", "lastClickTime", "flashbackState", "isShowingFlashback"];
+  for (let prop of properties) {
+    [timerA[prop], timerB[prop]] = [timerB[prop], timerA[prop]];
+  }
+  if (timerA.interval) clearInterval(timerA.interval);
+  if (timerB.interval) clearInterval(timerB.interval);
+  
+  updateTimerDisplay(sourceId);
+  updateTimerDisplay(targetId);
+  
+  if (timerA.state === 'counting') startTimerInterval(sourceId);
+  if (timerB.state === 'counting') startTimerInterval(targetId);
+  
+  cancelSwapMode();
+  saveTimersToLocalStorage();
+}
+
+function showModal(timerId) {
+  const modal = document.getElementById('timer-modal');
+  const modalTitle = document.getElementById('modal-title');
+  
+  modalTitle.textContent = `Cama Elástica Nº${timerId}`;
+
+  modal.dataset.timerId = timerId;
+  modal.style.display = 'flex';
+  const options = modal.querySelectorAll('.modal-content li');
+  options.forEach(option => {
+    option.onclick = () => {
+      const action = option.dataset.action;
+      handleModalAction(action, timerId);
+    };
+  });
+}
+
+function closeModal() {
+  const modal = document.getElementById('timer-modal');
+  modal.style.display = 'none';
+}
+
+function flashbackTimer(timerId) {
+    const timer = timers[timerId];
+    if (!timer.flashbackState) {
+        console.log('No flashback state to restore.');
+        return;
+    }
+
+    const currentState = {
+        state: timer.state,
+        time: timer.time,
+        initialDuration: timer.initialDuration,
+        ascending: timer.ascending,
+        startTime: timer.startTime
+    };
+
+    Object.assign(timer, timer.flashbackState);
+    timer.flashbackState = currentState;
+    
+    timer.isShowingFlashback = !timer.isShowingFlashback;
+
+    if (timer.interval) clearInterval(timer.interval);
+    
+    updateTimerDisplay(timerId);
+    if (timer.state === 'counting') {
+        startTimerInterval(timerId);
+    }
+    
+    saveTimersToLocalStorage();
+}
+
+function handleModalAction(action, timerId) {
+  switch (action) {
+    case 'swap':
+      if (!swapSource) {
+        enableSwapMode(timerId);
+      } else if (swapSource !== timerId) {
+        completeSwap(swapSource, timerId);
+      }
+      closeModal();
+      break;
+    case 'flashback':
+      flashbackTimer(timerId);
+      closeModal();
+      break;
+    case 'edit':
+      showEditModal(timerId);
+      closeModal();
+      break;
+    case 'share':
+      shareTimerState(timerId);
+      break;
+    case 'count':
+      showCountModal(timerId);
+      closeModal();
+      break;
+  }
+}
+
+document.getElementById('timer-modal').addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal')) {
+    closeModal();
+  }
+});
+
+let currentInput = '';
+
+const editModal = document.getElementById('edit-modal');
+const numButtons = editModal.querySelectorAll('.numpad button[data-value]');
+numButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    if (currentInput.length < 4) {
+      currentInput += button.dataset.value;
+      updateTimeDisplayNumpad();
+    }
+  });
+});
+
+document.getElementById('delete-btn').addEventListener('click', () => {
+  currentInput = currentInput.slice(0, -1);
+  updateTimeDisplayNumpad();
+});
+
+document.getElementById('accept-btn').addEventListener('click', () => {
+  const timerId = editModal.dataset.timerId;
+  const duration = calculateDuration(currentInput);
+  if (duration > 0) {
+    startTimer(timerId, duration);
+  }
+  closeEditModal();
+});
+
+function showEditModal(timerId) {
+  editModal.dataset.timerId = timerId;
+  editModal.style.display = 'flex';
+  currentInput = '';
+  updateTimeDisplayNumpad();
+}
+
+function closeEditModal() {
+  editModal.style.display = 'none';
+  currentInput = '';
+}
+
+function updateTimeDisplayNumpad() {
+  const display = document.getElementById('time-display');
+  let minutes = '00';
+  let seconds = '00';
+
+  if (currentInput.length === 0) {
+    display.textContent = '00:00';
+    return;
+  }
+
+  if (currentInput.length <= 2) {
+    minutes = currentInput.padStart(2, '0');
+  } else {
+    minutes = currentInput.slice(0, 2);
+    seconds = currentInput.slice(2).padStart(2, '0');
+  }
+
+  display.textContent = `${minutes}:${seconds}`;
+}
+
+function calculateDuration(input) {
+  let minutes = 0;
+  let seconds = 0;
+
+  if (input.length === 0) return 0;
+
+  if (input.length <= 2) {
+    minutes = parseInt(input.padStart(2, '0'), 10);
+  } else {
+    minutes = parseInt(input.slice(0, 2), 10);
+    seconds = parseInt(input.slice(2).padStart(2, '0'), 10);
+  }
+
+  return (minutes * 60) + seconds;
+}
+
+document.getElementById('edit-modal').addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal')) {
+    closeEditModal();
+  }
+});
+
+function shareTimerState(timerId) {
+  const shareData = {};
+  for (const id in timers) {
+    const timerCopy = { ...timers[id] };
+    delete timerCopy.element;
+    delete timerCopy.interval;
+    shareData[id] = timerCopy;
+  }
+
+  try {
+    const encodedData = encodeURIComponent(JSON.stringify(shareData));
+    const shareUrl = `${window.location.origin}${window.location.pathname}?timers=${encodedData}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'Estado de Temporizadores',
+        text: 'Aquí tienes el estado actual de mis temporizadores:',
+        url: shareUrl
+      }).then(() => {
+        closeModal();
+      }).catch(err => {
+        copyToClipboard(shareUrl);
+      });
+    } else {
+      copyToClipboard(shareUrl);
+    }
+  } catch (e) {
+    console.error('Error generando URL:', e);
+  }
+}
+
+function copyToClipboard(url) {
+  navigator.clipboard.writeText(url).then(() => {
+    alert('URL copiada al portapapeles');
+    closeModal();
+  }).catch(err => {
+    showShareModal(url);
+  });
+}
+
+function showShareModal(url) {
+  const shareModal = document.getElementById('share-modal');
+  const shareUrlInput = document.getElementById('share-url');
+  const copyBtn = document.getElementById('copy-btn');
+  const closeBtn = document.getElementById('close-share-btn');
+
+  shareUrlInput.value = url;
+  shareModal.style.display = 'flex';
+
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('URL copiada al portapapeles');
+      shareModal.style.display = 'none';
+    }).catch(err => {
+      alert('No se pudo copiar. Selecciona y copia la URL manualmente.');
+      shareUrlInput.select();
+    });
+  };
+
+  closeBtn.onclick = () => {
+    shareModal.style.display = 'none';
+  };
+
+  shareModal.onclick = (e) => {
+    if (e.target === shareModal) {
+      shareModal.style.display = 'none';
+    }
+  };
+}
+
+function formatNumberWithDots(num) {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function animateCountUp(displayElement, iconElement, endValue, duration) {
+  let startTime = null;
+
+  function step(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsedTime = timestamp - startTime;
+    const progress = Math.min(elapsedTime / duration, 1);
+    const easedProgress = progress * progress;
+    const currentValue = Math.floor(easedProgress * endValue);
+
+    displayElement.textContent = formatNumberWithDots(currentValue);
+
+    if (currentValue > 1000) {
+      displayElement.classList.add('count-display-green');
+      iconElement.style.display = 'block';
+    } else {
+      displayElement.classList.remove('count-display-green');
+      iconElement.style.display = 'none';
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      displayElement.textContent = formatNumberWithDots(endValue);
+      if (endValue > 1000) {
+        displayElement.classList.add('count-display-green');
+        iconElement.style.display = 'block';
+      }
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+function showCountModal(timerId) {
+  const timer = timers[timerId];
+  if (!timer || timer.state === 'idle') {
+    alert("Debes iniciar el temporizador antes de poder usar la función 'Contar'.");
+    return;
+  }
+
+  const countModal = document.getElementById('count-modal');
+  const countTitle = document.getElementById('count-modal-title');
+  const countDisplay = document.getElementById('count-display');
+  const lollipopIcon = document.getElementById('lollipop-icon');
+
+  countTitle.textContent = `Cama Elástica Nº${timerId}`;
+
+  const elapsedSeconds = Math.floor((Date.now() - timer.startTime) / 1000);
+  const targetValue = Math.round(elapsedSeconds * Math.sqrt(3));
+
+  countDisplay.textContent = '0';
+  countDisplay.classList.remove('count-display-green');
+  lollipopIcon.style.display = 'none';
+
+  countModal.style.display = 'flex';
+  animateCountUp(countDisplay, lollipopIcon, targetValue, 3000);
+
+  countModal.onclick = () => {
+    countModal.style.display = 'none';
+  };
+}
+</script>
+</body>
+</html>
