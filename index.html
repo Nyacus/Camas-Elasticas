@@ -568,6 +568,25 @@
       padding: 12px;
     }
   }
+  @media (max-width: 1000px) and (orientation: portrait) {
+    body[data-park-layout="vertical-split"] .timer {
+      font-size: clamp(3.1rem, 12vw, 4.6rem);
+      padding-top: 7%;
+    }
+    body[data-park-layout="vertical-split"] .timer-number {
+      font-size: clamp(2.7rem, 11vw, 4rem);
+    }
+    body[data-park-layout="vertical-split"] .indicator {
+      height: clamp(46px, 11vw, 62px);
+    }
+    body[data-park-layout="vertical-split"] .indicator i,
+    body[data-park-layout="vertical-split"] .indicator .material-symbols-outlined {
+      font-size: clamp(42px, 10vw, 58px);
+    }
+    body[data-park-layout="vertical-split"] .flashback-indicator {
+      font-size: clamp(42px, 10vw, 58px);
+    }
+  }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -1196,6 +1215,7 @@ function initializeTimers() {
 }
 
 function setupCurrentPark() {
+  document.body.dataset.parkLayout = currentPark.layout ? currentPark.layout.type : 'vertical-split';
   renderTimerGrid();
   initializeTimers();
   loadTimersFromLocalStorage();
