@@ -21,10 +21,10 @@
     flex-direction: column;
   }
   .app-header {
+    display: none;
     flex: 0 0 auto;
     min-height: 72px;
     padding: 10px 20px 0;
-    display: grid;
     grid-template-columns: minmax(170px, 1fr) minmax(240px, 1.4fr) auto;
     gap: 12px;
     align-items: center;
@@ -728,6 +728,10 @@ const APP_CONFIG = {
     }
   }
 };
+const ROUTE_PARKS = {
+  '/comics': 'parque-1',
+  '/nautico': 'parque-2'
+};
 const PARK_STORAGE_KEY = 'selectedParkId';
 const SESSIONS_STORAGE_KEY = 'jumpSessions';
 const MIN_COUNTABLE_SESSION_SECONDS = 60;
@@ -752,8 +756,13 @@ function vibrate() {
 function getInitialPark() {
   const urlParams = new URLSearchParams(window.location.search);
   const urlPark = urlParams.get('park');
+  const routePark = getParkIdFromPath(window.location.pathname);
   const storedPark = localStorage.getItem(PARK_STORAGE_KEY);
-  return APP_CONFIG.parks[urlPark] || APP_CONFIG.parks[storedPark] || APP_CONFIG.parks[APP_CONFIG.defaultParkId];
+  return APP_CONFIG.parks[routePark] || APP_CONFIG.parks[urlPark] || APP_CONFIG.parks[storedPark] || APP_CONFIG.parks[APP_CONFIG.defaultParkId];
+}
+
+function getParkIdFromPath(pathname) {
+  return ROUTE_PARKS[pathname.replace(/\/$/, '')];
 }
 
 function getTimersStorageKey() {
