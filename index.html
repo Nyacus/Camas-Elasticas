@@ -568,6 +568,16 @@
       padding: 12px;
     }
   }
+  @media (orientation: portrait) {
+    .modal-content,
+    .edit-modal-content,
+    .share-modal-content,
+    .count-modal-content,
+    .auth-modal-content {
+      width: 80vw;
+      max-width: 92vw;
+    }
+  }
   @media (max-width: 1000px) and (orientation: portrait) {
     body[data-park-layout="vertical-split"] .timer {
       font-size: clamp(3.1rem, 12vw, 4.6rem);
