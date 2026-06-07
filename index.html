@@ -946,14 +946,14 @@
       <article class="manager-metric">
         <i class="fa-solid fa-child-reaching"></i>
         <div>
-          <div class="metric-label">Niños hoy</div>
+          <div class="metric-label">Niños turno</div>
           <div class="metric-value" id="manager-total-children">0</div>
         </div>
       </article>
       <article class="manager-metric">
         <i class="fa-solid fa-cash-register"></i>
         <div>
-          <div class="metric-label">Caja hoy</div>
+          <div class="metric-label">Caja turno</div>
           <div class="metric-value" id="manager-total-cash">0,00 €</div>
         </div>
       </article>
@@ -1074,7 +1074,7 @@ const APP_CONFIG = {
       id: 'parque-1',
       name: 'Comics',
       bedCount: 12,
-      prices: { 10: 3, 20: 5, 30: 6 },
+      prices: { 10: 3, 20: 4, 30: 5 },
       layout: {
         type: 'vertical-split'
       }
@@ -1083,7 +1083,7 @@ const APP_CONFIG = {
       id: 'parque-2',
       name: 'Náutico',
       bedCount: 10,
-      prices: { 10: 3, 20: 5, 30: 6 },
+      prices: { 10: 3, 20: 4, 30: 5 },
       layout: {
         type: 'horizontal-split',
         columns: 5,
@@ -1158,6 +1158,107 @@ function getTodayKey(date = new Date()) {
     values[part.type] = part.value;
   });
   return `${values.year}-${values.month}-${values.day}`;
+}
+
+function getZonedDateParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: APP_CONFIG.timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(date);
+  const values = {};
+  parts.forEach(part => {
+    values[part.type] = part.value;
+  });
+  return values;
+}
+
+function getTimeZoneOffsetMs(date, timeZone = APP_CONFIG.timezone) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(date);
+  const values = {};
+  parts.forEach(part => {
+    values[part.type] = part.value;
+  });
+
+  const zonedAsUtc = Date.UTC(
+    Number(values.year),
+    Number(values.month) - 1,
+    Number(values.day),
+    Number(values.hour),
+    Number(values.minute),
+    Number(values.second)
+  );
+  return zonedAsUtc - date.getTime();
+}
+
+function createDateInTimeZone(year, month, day, hour, minute = 0, second = 0, millisecond = 0, timeZone = APP_CONFIG.timezone) {
+  const utcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond));
+  const firstOffset = getTimeZoneOffsetMs(utcGuess, timeZone);
+  const firstPass = new Date(utcGuess.getTime() - firstOffset);
+  const finalOffset = getTimeZoneOffsetMs(firstPass, timeZone);
+  return new Date(utcGuess.getTime() - finalOffset);
+}
+
+function getManagementWindow(date = new Date()) {
+  const values = getZonedDateParts(date);
+  const localHour = Number(values.hour);
+  let localDayStartUtc = Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day));
+
+  if (localHour < 3) {
+    localDayStartUtc -= 24 * 60 * 60 * 1000;
+  }
+
+  const startDay = new Date(localDayStartUtc);
+  const endDay = new Date(localDayStartUtc + (24 * 60 * 60 * 1000));
+  const start = createDateInTimeZone(
+    startDay.getUTCFullYear(),
+    startDay.getUTCMonth() + 1,
+    startDay.getUTCDate(),
+    17
+  );
+  const end = createDateInTimeZone(
+    endDay.getUTCFullYear(),
+    endDay.getUTCMonth() + 1,
+    endDay.getUTCDate(),
+    3
+  );
+
+  return {
+    startMs: start.getTime(),
+    endMs: end.getTime(),
+    start,
+    end
+  };
+}
+
+function formatManagementWindow(windowRange) {
+  const dateFormatter = new Intl.DateTimeFormat('es-ES', {
+    timeZone: APP_CONFIG.timezone,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+  const timeFormatter = new Intl.DateTimeFormat('es-ES', {
+    timeZone: APP_CONFIG.timezone,
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  return `Turno ${dateFormatter.format(windowRange.start)} ${timeFormatter.format(windowRange.start)} - ${dateFormatter.format(windowRange.end)} ${timeFormatter.format(windowRange.end)}`;
 }
 
 function getDurationMinutes(durationSeconds) {
@@ -1314,11 +1415,11 @@ function renderParkManagementCard(park, sessions) {
       <div class="park-metrics">
         <div class="park-metric">
           <span class="park-metric-value">${countedSessions.length}</span>
-          <span class="park-metric-label">niños hoy</span>
+          <span class="park-metric-label">niños turno</span>
         </div>
         <div class="park-metric">
           <span class="park-metric-value">${currencyFormatter.format(totalCash)}</span>
-          <span class="park-metric-label">caja hoy</span>
+          <span class="park-metric-label">caja turno</span>
         </div>
         <div class="park-metric">
           <span class="park-metric-value">${activeSessions.length}</span>
@@ -1367,7 +1468,7 @@ function renderRecentActivity(sessions) {
   }).join('');
 }
 
-function renderManagementDashboard(sessions = []) {
+function renderManagementDashboard(sessions = [], windowRange = getManagementWindow()) {
   const countedSessions = getCountedSessions(sessions);
   const activeSessions = getActiveSessions(sessions);
   const totalCash = getSessionsCash(sessions);
@@ -1376,13 +1477,7 @@ function renderManagementDashboard(sessions = []) {
   const dateEl = document.getElementById('manager-date');
 
   if (dateEl) {
-    dateEl.textContent = new Intl.DateTimeFormat('es-ES', {
-      timeZone: APP_CONFIG.timezone,
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    }).format(new Date());
+    dateEl.textContent = formatManagementWindow(windowRange);
   }
 
   document.getElementById('manager-total-children').textContent = countedSessions.length;
@@ -1410,20 +1505,21 @@ function watchManagementSessions() {
   if (!remoteDb || !firebaseAuth || !firebaseAuth.currentUser) return;
   stopManagementPanel();
 
+  const managementWindow = getManagementWindow();
   setManagerStatus('Firebase conectado', 'online');
-  renderManagementDashboard([]);
+  renderManagementDashboard([], managementWindow);
 
-  const today = getTodayKey();
   managementSessionsUnsubscribe = remoteDb.collection('sessions')
-    .where('day', '==', today)
+    .where('startedAtMs', '>=', managementWindow.startMs)
+    .where('startedAtMs', '<', managementWindow.endMs)
     .onSnapshot(snapshot => {
       const sessions = snapshot.docs.map(doc => doc.data());
-      renderManagementDashboard(sessions);
+      renderManagementDashboard(sessions, managementWindow);
       setManagerStatus('Firebase conectado', 'online');
     }, error => {
       console.error('No se pudo leer el panel de gestión:', error);
       setManagerStatus('No se pudo leer Firestore', 'error');
-      renderManagementDashboard([]);
+      renderManagementDashboard([], managementWindow);
     });
 }
 
