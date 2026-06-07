@@ -106,6 +106,261 @@
     color: #7F1D1D;
     background: #FEE2E2;
   }
+  .management-panel {
+    display: none;
+  }
+  body.management-mode {
+    min-height: 100%;
+    overflow: auto;
+    background: #F4F6F8;
+    color: #111827;
+  }
+  body.management-mode .app-header,
+  body.management-mode #timer-grid {
+    display: none;
+  }
+  body.management-mode .management-panel {
+    display: block;
+  }
+  .manager-shell {
+    width: min(1180px, calc(100vw - 32px));
+    margin: 0 auto;
+    padding: 24px 0 32px;
+  }
+  .manager-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+  .manager-title h1 {
+    font-size: clamp(1.8rem, 4vw, 3.1rem);
+    line-height: 1;
+    margin-bottom: 8px;
+    font-weight: 900;
+  }
+  .manager-title p {
+    color: #5B6472;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .manager-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .manager-status {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1px solid #D7DCE3;
+    border-radius: 10px;
+    background: #fff;
+    color: #4B5563;
+    font-weight: 900;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+  }
+  .manager-status.online {
+    color: #14532D;
+    background: #E9F8EE;
+    border-color: #B7E2C2;
+  }
+  .manager-status.error {
+    color: #7F1D1D;
+    background: #FEECEC;
+    border-color: #F4B4B4;
+  }
+  .manager-button {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    border-radius: 10px;
+    padding: 9px 12px;
+    background: #111827;
+    color: #fff;
+    font-family: inherit;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  .manager-button.secondary {
+    background: #fff;
+    color: #111827;
+    border: 1px solid #D7DCE3;
+  }
+  .manager-total-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .manager-metric,
+  .park-card,
+  .activity-card {
+    background: #fff;
+    border: 1px solid #D7DCE3;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+  }
+  .manager-metric {
+    min-height: 112px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+  }
+  .manager-metric i {
+    color: #2563EB;
+    font-size: 1.2rem;
+  }
+  .metric-label {
+    margin-top: 12px;
+    color: #5B6472;
+    font-size: 0.86rem;
+    font-weight: 900;
+  }
+  .metric-value {
+    margin-top: 4px;
+    font-size: clamp(1.65rem, 3vw, 2.35rem);
+    line-height: 1;
+    font-weight: 900;
+  }
+  .manager-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+  .park-card {
+    overflow: hidden;
+  }
+  .park-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid #EEF0F3;
+  }
+  .park-card-title h2 {
+    font-size: 1.35rem;
+    line-height: 1.1;
+    font-weight: 900;
+  }
+  .park-card-title span,
+  .park-card-pill {
+    color: #5B6472;
+    font-size: 0.84rem;
+    font-weight: 900;
+  }
+  .park-card-pill {
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #F3F6FA;
+    white-space: nowrap;
+  }
+  .park-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-bottom: 1px solid #EEF0F3;
+  }
+  .park-metric {
+    padding: 16px;
+    border-left: 1px solid #EEF0F3;
+  }
+  .park-metric:first-child {
+    border-left: 0;
+  }
+  .park-metric-value {
+    display: block;
+    font-size: 1.75rem;
+    line-height: 1;
+    font-weight: 900;
+  }
+  .park-metric-label {
+    display: block;
+    margin-top: 6px;
+    color: #5B6472;
+    font-size: 0.78rem;
+    font-weight: 900;
+  }
+  .park-detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+  .detail-box {
+    min-height: 94px;
+    border-radius: 8px;
+    background: #F7F9FC;
+    padding: 12px;
+  }
+  .detail-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4B5563;
+    font-size: 0.82rem;
+    font-weight: 900;
+    margin-bottom: 10px;
+  }
+  .duration-row,
+  .active-bed-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: #111827;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+  .muted-empty {
+    color: #6B7280;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  .activity-card {
+    grid-column: 1 / -1;
+    padding: 16px;
+  }
+  .activity-card h2 {
+    font-size: 1.25rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+  }
+  .activity-list {
+    display: grid;
+    gap: 8px;
+  }
+  .activity-row {
+    display: grid;
+    grid-template-columns: 92px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    background: #F7F9FC;
+    color: #111827;
+    font-weight: 700;
+  }
+  .activity-time {
+    color: #5B6472;
+    font-size: 0.85rem;
+    font-weight: 900;
+  }
+  .activity-price {
+    font-weight: 900;
+  }
   .grid-container {
     display: grid;
     grid-template-columns: 1fr max(0px, calc(4vw - 16px)) 1fr;
@@ -567,6 +822,43 @@
     .grid-container {
       padding: 12px;
     }
+    .manager-shell {
+      width: min(100vw - 20px, 1180px);
+      padding: 12px 0 24px;
+    }
+    .manager-topbar {
+      display: grid;
+      gap: 12px;
+    }
+    .manager-actions {
+      justify-content: stretch;
+    }
+    .manager-status,
+    .manager-button {
+      flex: 1 1 auto;
+      justify-content: center;
+    }
+    .manager-total-grid,
+    .manager-grid {
+      grid-template-columns: 1fr;
+    }
+    .park-metrics {
+      grid-template-columns: 1fr;
+    }
+    .park-metric {
+      border-left: 0;
+      border-top: 1px solid #EEF0F3;
+    }
+    .park-metric:first-child {
+      border-top: 0;
+    }
+    .park-detail {
+      grid-template-columns: 1fr;
+    }
+    .activity-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
   }
   @media (orientation: portrait) {
     .modal-content,
@@ -627,6 +919,70 @@
   <div class="firebase-status" id="firebase-status">Local</div>
 </header>
 <div class="grid-container" id="timer-grid"></div>
+<main class="management-panel" id="management-panel" aria-live="polite">
+  <div class="manager-shell">
+    <section class="manager-topbar">
+      <div class="manager-title">
+        <h1>Gestión diaria</h1>
+        <p id="manager-date">Hoy</p>
+      </div>
+      <div class="manager-actions">
+        <div class="manager-status" id="manager-status">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Conectando</span>
+        </div>
+        <button class="manager-button secondary" id="manager-refresh-btn" type="button">
+          <i class="fa-solid fa-rotate-right"></i>
+          Actualizar
+        </button>
+        <button class="manager-button" id="manager-logout-btn" type="button">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Salir
+        </button>
+      </div>
+    </section>
+
+    <section class="manager-total-grid" aria-label="Resumen total">
+      <article class="manager-metric">
+        <i class="fa-solid fa-child-reaching"></i>
+        <div>
+          <div class="metric-label">Niños hoy</div>
+          <div class="metric-value" id="manager-total-children">0</div>
+        </div>
+      </article>
+      <article class="manager-metric">
+        <i class="fa-solid fa-cash-register"></i>
+        <div>
+          <div class="metric-label">Caja hoy</div>
+          <div class="metric-value" id="manager-total-cash">0,00 €</div>
+        </div>
+      </article>
+      <article class="manager-metric">
+        <i class="fa-solid fa-person-running"></i>
+        <div>
+          <div class="metric-label">Saltando ahora</div>
+          <div class="metric-value" id="manager-total-active">0</div>
+        </div>
+      </article>
+      <article class="manager-metric">
+        <i class="fa-solid fa-bed"></i>
+        <div>
+          <div class="metric-label">Camas totales</div>
+          <div class="metric-value" id="manager-total-beds">0</div>
+        </div>
+      </article>
+    </section>
+
+    <section class="manager-grid" id="manager-parks" aria-label="Resumen por parques"></section>
+
+    <section class="activity-card">
+      <h2>Últimos movimientos</h2>
+      <div class="activity-list" id="manager-activity-list">
+        <div class="muted-empty">Esperando datos.</div>
+      </div>
+    </section>
+  </div>
+</main>
 
 <div id="timer-modal" class="modal" style="display: none;">
   <div class="modal-content">
@@ -716,7 +1072,7 @@ const APP_CONFIG = {
   parks: {
     'parque-1': {
       id: 'parque-1',
-      name: 'Parque 1',
+      name: 'Comics',
       bedCount: 12,
       prices: { 10: 3, 20: 5, 30: 6 },
       layout: {
@@ -725,7 +1081,7 @@ const APP_CONFIG = {
     },
     'parque-2': {
       id: 'parque-2',
-      name: 'Parque 2',
+      name: 'Náutico',
       bedCount: 10,
       prices: { 10: 3, 20: 5, 30: 6 },
       layout: {
@@ -742,13 +1098,16 @@ const ROUTE_PARKS = {
   '/comics': 'parque-1',
   '/nautico': 'parque-2'
 };
+const MANAGEMENT_PATH = '/gestion';
 const PARK_STORAGE_KEY = 'selectedParkId';
 const SESSIONS_STORAGE_KEY = 'jumpSessions';
 const MIN_COUNTABLE_SESSION_SECONDS = 60;
+const isManagementView = isManagementRoute(window.location.pathname, window.location.search);
 let currentPark = getInitialPark();
 let remoteDb = null;
 let firebaseAuth = null;
 let remoteSessionsUnsubscribe = null;
+let managementSessionsUnsubscribe = null;
 let usingRemoteSummary = false;
 let authModalDismissed = false;
 
@@ -771,8 +1130,16 @@ function getInitialPark() {
   return APP_CONFIG.parks[routePark] || APP_CONFIG.parks[urlPark] || APP_CONFIG.parks[storedPark] || APP_CONFIG.parks[APP_CONFIG.defaultParkId];
 }
 
+function normalizePath(pathname) {
+  return pathname.replace(/\/$/, '') || '/';
+}
+
+function isManagementRoute(pathname, search = '') {
+  return normalizePath(pathname) === MANAGEMENT_PATH || new URLSearchParams(search).get('view') === 'gestion';
+}
+
 function getParkIdFromPath(pathname) {
-  return ROUTE_PARKS[pathname.replace(/\/$/, '')];
+  return ROUTE_PARKS[normalizePath(pathname)];
 }
 
 function getTimersStorageKey() {
@@ -864,6 +1231,223 @@ function setFirebaseStatus(text, state = 'local') {
   statusEl.classList.toggle('error', state === 'error');
 }
 
+function setManagerStatus(text, state = 'local') {
+  const statusEl = document.getElementById('manager-status');
+  if (!statusEl) return;
+  statusEl.innerHTML = `<i class="fa-solid ${state === 'online' ? 'fa-circle-check' : state === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info'}"></i><span>${text}</span>`;
+  statusEl.classList.toggle('online', state === 'online');
+  statusEl.classList.toggle('error', state === 'error');
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function formatTime(ms) {
+  if (!ms) return '--:--';
+  return new Intl.DateTimeFormat('es-ES', {
+    timeZone: APP_CONFIG.timezone,
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(ms));
+}
+
+function getCountedSessions(sessions) {
+  return sessions.filter(session => session.status !== 'replaced');
+}
+
+function getActiveSessions(sessions) {
+  return getCountedSessions(sessions).filter(session => session.status === 'active');
+}
+
+function getSessionsCash(sessions) {
+  return getCountedSessions(sessions).reduce((sum, session) => sum + Number(session.price || 0), 0);
+}
+
+function getParkSessions(parkId, sessions) {
+  return sessions.filter(session => session.parkId === parkId);
+}
+
+function renderDurationRows(sessions) {
+  const countedSessions = getCountedSessions(sessions);
+  const durations = [10, 20, 30];
+  return durations.map(duration => {
+    const total = countedSessions.filter(session => Number(session.durationMinutes) === duration).length;
+    return `<div class="duration-row"><span>${duration} min</span><strong>${total}</strong></div>`;
+  }).join('');
+}
+
+function renderActiveBeds(sessions) {
+  const activeBeds = getActiveSessions(sessions)
+    .map(session => Number(session.currentBedNumber || session.bedNumber))
+    .filter(Boolean)
+    .sort((a, b) => a - b);
+
+  if (!activeBeds.length) {
+    return '<div class="muted-empty">Sin camas activas ahora.</div>';
+  }
+
+  return activeBeds.map(bedNumber => {
+    return `<div class="active-bed-row"><span>Cama ${bedNumber}</span><strong>Activa</strong></div>`;
+  }).join('');
+}
+
+function renderParkManagementCard(park, sessions) {
+  const countedSessions = getCountedSessions(sessions);
+  const activeSessions = getActiveSessions(sessions);
+  const totalCash = getSessionsCash(sessions);
+
+  return `
+    <article class="park-card">
+      <div class="park-card-header">
+        <div class="park-card-title">
+          <h2>${escapeHtml(park.name)}</h2>
+          <span>${park.bedCount} camas</span>
+        </div>
+        <div class="park-card-pill">${park.id === 'parque-1' ? '/comics' : '/nautico'}</div>
+      </div>
+      <div class="park-metrics">
+        <div class="park-metric">
+          <span class="park-metric-value">${countedSessions.length}</span>
+          <span class="park-metric-label">niños hoy</span>
+        </div>
+        <div class="park-metric">
+          <span class="park-metric-value">${currencyFormatter.format(totalCash)}</span>
+          <span class="park-metric-label">caja hoy</span>
+        </div>
+        <div class="park-metric">
+          <span class="park-metric-value">${activeSessions.length}</span>
+          <span class="park-metric-label">saltando</span>
+        </div>
+      </div>
+      <div class="park-detail">
+        <div class="detail-box">
+          <div class="detail-title"><i class="fa-solid fa-clock"></i> Tickets vendidos</div>
+          ${renderDurationRows(sessions)}
+        </div>
+        <div class="detail-box">
+          <div class="detail-title"><i class="fa-solid fa-bed"></i> Camas ocupadas</div>
+          ${renderActiveBeds(sessions)}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderRecentActivity(sessions) {
+  const activityList = document.getElementById('manager-activity-list');
+  if (!activityList) return;
+
+  const recentSessions = getCountedSessions(sessions)
+    .slice()
+    .sort((a, b) => Number(b.updatedAtMs || b.startedAtMs || 0) - Number(a.updatedAtMs || a.startedAtMs || 0))
+    .slice(0, 10);
+
+  if (!recentSessions.length) {
+    activityList.innerHTML = '<div class="muted-empty">Todavía no hay movimientos hoy.</div>';
+    return;
+  }
+
+  activityList.innerHTML = recentSessions.map(session => {
+    const park = APP_CONFIG.parks[session.parkId];
+    const statusText = session.status === 'active' ? 'saltando' : 'finalizado';
+    const bedNumber = session.currentBedNumber || session.bedNumber || '-';
+    return `
+      <div class="activity-row">
+        <span class="activity-time">${formatTime(session.updatedAtMs || session.startedAtMs)}</span>
+        <span>${escapeHtml(park ? park.name : session.parkName || 'Parque')} · Cama ${escapeHtml(bedNumber)} · ${escapeHtml(session.durationMinutes || '?')} min · ${statusText}</span>
+        <span class="activity-price">${currencyFormatter.format(Number(session.price || 0))}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderManagementDashboard(sessions = []) {
+  const countedSessions = getCountedSessions(sessions);
+  const activeSessions = getActiveSessions(sessions);
+  const totalCash = getSessionsCash(sessions);
+  const totalBeds = Object.values(APP_CONFIG.parks).reduce((sum, park) => sum + park.bedCount, 0);
+  const parksContainer = document.getElementById('manager-parks');
+  const dateEl = document.getElementById('manager-date');
+
+  if (dateEl) {
+    dateEl.textContent = new Intl.DateTimeFormat('es-ES', {
+      timeZone: APP_CONFIG.timezone,
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date());
+  }
+
+  document.getElementById('manager-total-children').textContent = countedSessions.length;
+  document.getElementById('manager-total-cash').textContent = currencyFormatter.format(totalCash);
+  document.getElementById('manager-total-active').textContent = activeSessions.length;
+  document.getElementById('manager-total-beds').textContent = totalBeds;
+
+  if (parksContainer) {
+    parksContainer.innerHTML = Object.values(APP_CONFIG.parks).map(park => {
+      return renderParkManagementCard(park, getParkSessions(park.id, sessions));
+    }).join('');
+  }
+
+  renderRecentActivity(sessions);
+}
+
+function stopManagementPanel() {
+  if (managementSessionsUnsubscribe) {
+    managementSessionsUnsubscribe();
+    managementSessionsUnsubscribe = null;
+  }
+}
+
+function watchManagementSessions() {
+  if (!remoteDb || !firebaseAuth || !firebaseAuth.currentUser) return;
+  stopManagementPanel();
+
+  setManagerStatus('Firebase conectado', 'online');
+  renderManagementDashboard([]);
+
+  const today = getTodayKey();
+  managementSessionsUnsubscribe = remoteDb.collection('sessions')
+    .where('day', '==', today)
+    .onSnapshot(snapshot => {
+      const sessions = snapshot.docs.map(doc => doc.data());
+      renderManagementDashboard(sessions);
+      setManagerStatus('Firebase conectado', 'online');
+    }, error => {
+      console.error('No se pudo leer el panel de gestión:', error);
+      setManagerStatus('No se pudo leer Firestore', 'error');
+      renderManagementDashboard([]);
+    });
+}
+
+function setupManagementControls() {
+  const refreshBtn = document.getElementById('manager-refresh-btn');
+  const logoutBtn = document.getElementById('manager-logout-btn');
+
+  if (refreshBtn) {
+    refreshBtn.onclick = () => {
+      if (firebaseAuth && firebaseAuth.currentUser) {
+        watchManagementSessions();
+      }
+    };
+  }
+
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      if (firebaseAuth) {
+        void firebaseAuth.signOut();
+      }
+    };
+  }
+}
+
 function firebaseIsConfigured() {
   return Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId && FIREBASE_CONFIG.appId);
 }
@@ -887,7 +1471,12 @@ function loadScript(src) {
 async function initFirebase() {
   if (!firebaseIsConfigured()) {
     setFirebaseStatus('Local', 'local');
-    updateDailySummaryFromLocal();
+    if (isManagementView) {
+      setManagerStatus('Firebase no configurado', 'error');
+      showAuthModal();
+    } else {
+      updateDailySummaryFromLocal();
+    }
     return;
   }
 
@@ -908,13 +1497,23 @@ async function initFirebase() {
         hideAuthModal();
         authModalDismissed = false;
         setFirebaseStatus('Firebase', 'online');
-        watchRemoteDailySummary();
+        if (isManagementView) {
+          watchManagementSessions();
+        } else {
+          watchRemoteDailySummary();
+        }
       } else {
         usingRemoteSummary = false;
         stopRemoteDailySummary();
+        stopManagementPanel();
         setFirebaseStatus('Login', 'error');
-        updateDailySummaryFromLocal();
-        if (!authModalDismissed) {
+        if (isManagementView) {
+          setManagerStatus('Acceso requerido', 'error');
+          showAuthModal();
+        } else {
+          updateDailySummaryFromLocal();
+        }
+        if (!isManagementView && !authModalDismissed) {
           showAuthModal();
         }
       }
@@ -925,7 +1524,12 @@ async function initFirebase() {
     firebaseAuth = null;
     usingRemoteSummary = false;
     setFirebaseStatus('Local', 'error');
-    updateDailySummaryFromLocal();
+    if (isManagementView) {
+      setManagerStatus('Error conectando Firebase', 'error');
+      showAuthModal();
+    } else {
+      updateDailySummaryFromLocal();
+    }
   }
 }
 
@@ -997,6 +1601,14 @@ function setupAuthControls() {
   const localBtn = document.getElementById('auth-local-btn');
   const errorEl = document.getElementById('auth-error');
   const statusEl = document.getElementById('firebase-status');
+  const titleEl = document.querySelector('.auth-modal-content h2');
+
+  if (isManagementView) {
+    if (titleEl) titleEl.textContent = 'Acceso gestión';
+    if (localBtn) localBtn.style.display = 'none';
+    const actionsEl = document.querySelector('.auth-actions');
+    if (actionsEl) actionsEl.style.gridTemplateColumns = '1fr';
+  }
 
   async function submitLogin() {
     if (!firebaseAuth) return;
@@ -1015,6 +1627,7 @@ function setupAuthControls() {
 
   loginBtn.onclick = submitLogin;
   localBtn.onclick = () => {
+    if (isManagementView) return;
     authModalDismissed = true;
     hideAuthModal();
     setFirebaseStatus('Local', 'local');
@@ -1329,6 +1942,16 @@ function startTimerInterval(id) {
 }
 
 function bootApp() {
+    if (isManagementView) {
+      document.body.classList.add('management-mode');
+      setupAuthControls();
+      setupManagementControls();
+      renderManagementDashboard([]);
+      setManagerStatus('Conectando', 'local');
+      void initFirebase();
+      return;
+    }
+
     setupParkSelector();
     setupAuthControls();
     setupCurrentPark();
