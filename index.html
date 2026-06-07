@@ -353,6 +353,29 @@
     color: #111827;
     font-weight: 700;
   }
+  .activity-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+  .activity-status.active {
+    color: #14532D;
+    background: #DCFCE7;
+  }
+  .activity-status.overrun {
+    color: #7C2D12;
+    background: #FFEDD5;
+  }
+  .activity-status.finished {
+    color: #7F1D1D;
+    background: #FEE2E2;
+  }
   .activity-time {
     color: #5B6472;
     font-size: 0.85rem;
@@ -1108,6 +1131,9 @@ let remoteDb = null;
 let firebaseAuth = null;
 let remoteSessionsUnsubscribe = null;
 let managementSessionsUnsubscribe = null;
+let managementRefreshInterval = null;
+let managementCurrentSessions = [];
+let managementCurrentWindow = null;
 let usingRemoteSummary = false;
 let authModalDismissed = false;
 
@@ -1311,7 +1337,7 @@ function getLocalSessionsForCurrentParkToday() {
 function renderDailySummary(sessions) {
   const countedSessions = sessions.filter(session => session.status !== 'replaced');
   const activeSessions = countedSessions.filter(session => session.status === 'active');
-  const totalCash = countedSessions.reduce((sum, session) => sum + Number(session.price || 0), 0);
+  const totalCash = countedSessions.reduce((sum, session) => sum + getSessionCurrentPrice(session), 0);
 
   document.getElementById('today-count').textContent = countedSessions.length;
   document.getElementById('today-cash').textContent = currencyFormatter.format(totalCash);
@@ -1366,8 +1392,15 @@ function getActiveSessions(sessions) {
   return getCountedSessions(sessions).filter(session => session.status === 'active');
 }
 
+function getSessionCurrentPrice(session) {
+  const park = APP_CONFIG.parks[session.parkId] || currentPark;
+  const durationMinutes = Number(session.durationMinutes || getDurationMinutes(Number(session.durationSeconds || 0)));
+  const currentPrice = park && park.prices ? park.prices[durationMinutes] : null;
+  return Number(currentPrice ?? session.price ?? 0);
+}
+
 function getSessionsCash(sessions) {
-  return getCountedSessions(sessions).reduce((sum, session) => sum + Number(session.price || 0), 0);
+  return getCountedSessions(sessions).reduce((sum, session) => sum + getSessionCurrentPrice(session), 0);
 }
 
 function getParkSessions(parkId, sessions) {
@@ -1385,17 +1418,44 @@ function renderDurationRows(sessions) {
 
 function renderActiveBeds(sessions) {
   const activeBeds = getActiveSessions(sessions)
-    .map(session => Number(session.currentBedNumber || session.bedNumber))
-    .filter(Boolean)
-    .sort((a, b) => a - b);
+    .map(session => ({
+      bedNumber: Number(session.currentBedNumber || session.bedNumber),
+      status: getSessionManagementStatus(session)
+    }))
+    .filter(item => item.bedNumber)
+    .sort((a, b) => a.bedNumber - b.bedNumber);
 
   if (!activeBeds.length) {
     return '<div class="muted-empty">Sin camas activas ahora.</div>';
   }
 
-  return activeBeds.map(bedNumber => {
-    return `<div class="active-bed-row"><span>Cama ${bedNumber}</span><strong>Activa</strong></div>`;
+  return activeBeds.map(item => {
+    return `<div class="active-bed-row"><span>Cama ${item.bedNumber}</span><span class="activity-status ${item.status.className}">${escapeHtml(item.status.label)}</span></div>`;
   }).join('');
+}
+
+function getSessionManagementStatus(session) {
+  if (session.status !== 'active') {
+    return {
+      label: 'cerrado manualmente',
+      className: 'finished'
+    };
+  }
+
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - Number(session.startedAtMs || Date.now())) / 1000));
+  const durationSeconds = Number(session.durationSeconds || Number(session.durationMinutes || 0) * 60);
+
+  if (durationSeconds && elapsedSeconds > durationSeconds) {
+    return {
+      label: 'tiempo agotado',
+      className: 'overrun'
+    };
+  }
+
+  return {
+    label: 'saltando',
+    className: 'active'
+  };
 }
 
 function renderParkManagementCard(park, sessions) {
@@ -1456,13 +1516,16 @@ function renderRecentActivity(sessions) {
 
   activityList.innerHTML = recentSessions.map(session => {
     const park = APP_CONFIG.parks[session.parkId];
-    const statusText = session.status === 'active' ? 'saltando' : 'finalizado';
+    const sessionStatus = getSessionManagementStatus(session);
     const bedNumber = session.currentBedNumber || session.bedNumber || '-';
     return `
       <div class="activity-row">
         <span class="activity-time">${formatTime(session.updatedAtMs || session.startedAtMs)}</span>
-        <span>${escapeHtml(park ? park.name : session.parkName || 'Parque')} · Cama ${escapeHtml(bedNumber)} · ${escapeHtml(session.durationMinutes || '?')} min · ${statusText}</span>
-        <span class="activity-price">${currencyFormatter.format(Number(session.price || 0))}</span>
+        <span>
+          ${escapeHtml(park ? park.name : session.parkName || 'Parque')} · Cama ${escapeHtml(bedNumber)} · ${escapeHtml(session.durationMinutes || '?')} min
+          <span class="activity-status ${sessionStatus.className}">${escapeHtml(sessionStatus.label)}</span>
+        </span>
+        <span class="activity-price">${currencyFormatter.format(getSessionCurrentPrice(session))}</span>
       </div>
     `;
   }).join('');
@@ -1499,6 +1562,12 @@ function stopManagementPanel() {
     managementSessionsUnsubscribe();
     managementSessionsUnsubscribe = null;
   }
+  if (managementRefreshInterval) {
+    clearInterval(managementRefreshInterval);
+    managementRefreshInterval = null;
+  }
+  managementCurrentSessions = [];
+  managementCurrentWindow = null;
 }
 
 function watchManagementSessions() {
@@ -1506,14 +1575,21 @@ function watchManagementSessions() {
   stopManagementPanel();
 
   const managementWindow = getManagementWindow();
+  managementCurrentWindow = managementWindow;
   setManagerStatus('Firebase conectado', 'online');
   renderManagementDashboard([], managementWindow);
+  managementRefreshInterval = setInterval(() => {
+    if (managementCurrentWindow) {
+      renderManagementDashboard(managementCurrentSessions, managementCurrentWindow);
+    }
+  }, 30000);
 
   managementSessionsUnsubscribe = remoteDb.collection('sessions')
     .where('startedAtMs', '>=', managementWindow.startMs)
     .where('startedAtMs', '<', managementWindow.endMs)
     .onSnapshot(snapshot => {
       const sessions = snapshot.docs.map(doc => doc.data());
+      managementCurrentSessions = sessions;
       renderManagementDashboard(sessions, managementWindow);
       setManagerStatus('Firebase conectado', 'online');
     }, error => {
