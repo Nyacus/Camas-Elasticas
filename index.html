@@ -730,6 +730,7 @@ const APP_CONFIG = {
 };
 const PARK_STORAGE_KEY = 'selectedParkId';
 const SESSIONS_STORAGE_KEY = 'jumpSessions';
+const MIN_COUNTABLE_SESSION_SECONDS = 60;
 let currentPark = getInitialPark();
 let remoteDb = null;
 let firebaseAuth = null;
@@ -1075,13 +1076,17 @@ function closeJumpSession(timerId, status = 'finished') {
   const now = Date.now();
   const startedAtMs = Number(timer.activeSessionSnapshot.startedAtMs || now);
   const elapsedSeconds = Math.max(0, Math.floor((now - startedAtMs) / 1000));
+  const isEarlyCancellation = status === 'finished' && elapsedSeconds < MIN_COUNTABLE_SESSION_SECONDS;
+  const finalStatus = isEarlyCancellation ? 'replaced' : status;
   const session = {
     ...timer.activeSessionSnapshot,
     currentBedNumber: Number(timerId),
     endedAtMs: now,
     elapsedSeconds,
     overrunSeconds: Math.max(0, elapsedSeconds - Number(timer.activeSessionSnapshot.durationSeconds || 0)),
-    status
+    status: finalStatus,
+    cancellationReason: isEarlyCancellation ? 'under_minimum_time' : null,
+    counted: !isEarlyCancellation && finalStatus !== 'replaced'
   };
 
   saveSessionLocally(session);
