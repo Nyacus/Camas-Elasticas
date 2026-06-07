@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>12 Temporizadores</title>
+<title>Camas Elásticas</title>
 <style>
   * {
     box-sizing: border-box;
@@ -16,11 +16,103 @@
     background-color: rgb(237, 237, 237);
     font-family: 'Roboto', sans-serif;
   }
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  .app-header {
+    flex: 0 0 auto;
+    min-height: 72px;
+    padding: 10px 20px 0;
+    display: grid;
+    grid-template-columns: minmax(170px, 1fr) minmax(240px, 1.4fr) auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .park-control,
+  .daily-summary,
+  .firebase-status {
+    min-height: 56px;
+    border: 2px solid #000;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
+  }
+  .park-control {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 12px;
+  }
+  .park-control label {
+    font-weight: 900;
+    color: #222;
+  }
+  #park-select {
+    min-width: 0;
+    width: 100%;
+    border: 1px solid #D1D5DB;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: #F9FAFB;
+  }
+  .daily-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: hidden;
+  }
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 8px;
+    border-left: 1px solid #E5E7EB;
+    text-align: center;
+  }
+  .summary-item:first-child {
+    border-left: 0;
+  }
+  .summary-value {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+  }
+  .summary-label {
+    margin-top: 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #4B5563;
+  }
+  .firebase-status {
+    min-width: 92px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 900;
+    color: #374151;
+  }
+  .firebase-status.online {
+    color: #14532D;
+    background: #DCFCE7;
+  }
+  .firebase-status.error {
+    color: #7F1D1D;
+    background: #FEE2E2;
+  }
   .grid-container {
     display: grid;
     grid-template-columns: 1fr max(0px, calc(4vw - 16px)) 1fr;
     grid-template-rows: repeat(3, 1fr) max(0px, calc(4vw - 16px)) repeat(3, 1fr);
-    height: 85vh;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
     width: 100vw;
     gap: 8px;
     padding: 20px;
@@ -308,6 +400,60 @@
   .count-display-green {
     color: #28a745;
   }
+  .auth-modal-content {
+    background-color: white;
+    padding: 18px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    width: min(88vw, 340px);
+    max-width: 90vw;
+    border: 1px solid #E5E7EB;
+  }
+  .auth-modal-content h2 {
+    margin-bottom: 12px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+  }
+  .auth-modal-content input {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 11px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  .auth-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .auth-actions button {
+    padding: 11px 12px;
+    border: 0;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 900;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #auth-login-btn {
+    background: #111827;
+    color: #fff;
+  }
+  #auth-local-btn {
+    background: #F3F4F6;
+    color: #111827;
+  }
+  #auth-error {
+    min-height: 18px;
+    margin-top: 10px;
+    color: #B91C1C;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-align: center;
+  }
 
   /* =============================== */
   /* THEME A: Material Compact + Ripple (override final) */
@@ -397,6 +543,31 @@
     .modal-content li { font-size: 0.98rem; padding: 9px 10px; }
     .modal-content li i{ font-size:20px; width:20px; margin:0 10px 0 6px; }
   }
+  @media (max-width: 720px) {
+    .app-header {
+      grid-template-columns: 1fr;
+      padding: 8px 12px 0;
+      gap: 8px;
+    }
+    .park-control,
+    .daily-summary,
+    .firebase-status {
+      min-height: 44px;
+      border-radius: 10px;
+    }
+    .firebase-status {
+      justify-content: flex-start;
+    }
+    .summary-value {
+      font-size: 1rem;
+    }
+    .summary-label {
+      font-size: 0.68rem;
+    }
+    .grid-container {
+      padding: 12px;
+    }
+  }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -405,20 +576,28 @@
  <link rel="apple-touch-icon" href="apple-touch-icon-125.png">
 </head>
 <body>
-<div class="grid-container">
-  <div class="timer" data-timer-id="1"></div>
-  <div class="timer" data-timer-id="2"></div>
-  <div class="timer" data-timer-id="3"></div>
-  <div class="timer" data-timer-id="4"></div>
-  <div class="timer" data-timer-id="5"></div>
-  <div class="timer" data-timer-id="6"></div>
-  <div class="timer" data-timer-id="7"></div>
-  <div class="timer" data-timer-id="8"></div>
-  <div class="timer" data-timer-id="9"></div>
-  <div class="timer" data-timer-id="10"></div>
-  <div class="timer" data-timer-id="11"></div>
-  <div class="timer" data-timer-id="12"></div>
-</div>
+<header class="app-header">
+  <div class="park-control">
+    <label for="park-select">Parque</label>
+    <select id="park-select"></select>
+  </div>
+  <div class="daily-summary" aria-live="polite">
+    <div class="summary-item">
+      <span class="summary-value" id="today-count">0</span>
+      <span class="summary-label">niños hoy</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-value" id="today-cash">0,00 €</span>
+      <span class="summary-label">caja hoy</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-value" id="active-count">0</span>
+      <span class="summary-label">saltando</span>
+    </div>
+  </div>
+  <div class="firebase-status" id="firebase-status">Local</div>
+</header>
+<div class="grid-container" id="timer-grid"></div>
 
 <div id="timer-modal" class="modal" style="display: none;">
   <div class="modal-content">
@@ -475,15 +654,558 @@
   </div>
 </div>
 
+<div id="auth-modal" class="modal" style="display: none;">
+  <div class="auth-modal-content">
+    <h2>Acceso</h2>
+    <input type="email" id="auth-email" placeholder="Email" autocomplete="username">
+    <input type="password" id="auth-password" placeholder="Contraseña" autocomplete="current-password">
+    <div class="auth-actions">
+      <button id="auth-login-btn">Entrar</button>
+      <button id="auth-local-btn">Local</button>
+    </div>
+    <div id="auth-error"></div>
+  </div>
+</div>
+
 <script>
 let swapSource = null;
 const timers = {};
 let vibrationsEnabled = false;
+const FIREBASE_SDK_VERSION = '10.12.5';
+const FIREBASE_CONFIG = {
+  apiKey: '',
+  authDomain: '',
+  projectId: '',
+  storageBucket: '',
+  messagingSenderId: '',
+  appId: ''
+};
+const APP_CONFIG = {
+  timezone: 'Europe/Madrid',
+  currency: 'EUR',
+  defaultParkId: 'parque-1',
+  parks: {
+    'parque-1': {
+      id: 'parque-1',
+      name: 'Parque 1',
+      bedCount: 12,
+      prices: { 10: 3, 20: 5, 30: 6 },
+      layout: {
+        type: 'vertical-split'
+      }
+    },
+    'parque-2': {
+      id: 'parque-2',
+      name: 'Parque 2',
+      bedCount: 10,
+      prices: { 10: 3, 20: 5, 30: 6 },
+      layout: {
+        type: 'horizontal-split',
+        columns: 5,
+        rows: 2,
+        columnSeparatorAfter: 3,
+        rowSeparatorAfter: 1
+      }
+    }
+  }
+};
+const PARK_STORAGE_KEY = 'selectedParkId';
+const SESSIONS_STORAGE_KEY = 'jumpSessions';
+let currentPark = getInitialPark();
+let remoteDb = null;
+let firebaseAuth = null;
+let remoteSessionsUnsubscribe = null;
+let usingRemoteSummary = false;
+let authModalDismissed = false;
+
+const currencyFormatter = new Intl.NumberFormat('es-ES', {
+  style: 'currency',
+  currency: APP_CONFIG.currency
+});
 
 function vibrate() {
   if (vibrationsEnabled && navigator.vibrate) {
     navigator.vibrate([100, 50, 100]);
   }
+}
+
+function getInitialPark() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlPark = urlParams.get('park');
+  const storedPark = localStorage.getItem(PARK_STORAGE_KEY);
+  return APP_CONFIG.parks[urlPark] || APP_CONFIG.parks[storedPark] || APP_CONFIG.parks[APP_CONFIG.defaultParkId];
+}
+
+function getTimersStorageKey() {
+  return `timers:${currentPark.id}`;
+}
+
+function getTodayKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('es-ES', {
+    timeZone: APP_CONFIG.timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date);
+  const values = {};
+  parts.forEach(part => {
+    values[part.type] = part.value;
+  });
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function getDurationMinutes(durationSeconds) {
+  return Math.round(durationSeconds / 60);
+}
+
+function getPriceForDuration(durationSeconds) {
+  const durationMinutes = getDurationMinutes(durationSeconds);
+  return Number(currentPark.prices[durationMinutes] || 0);
+}
+
+function createSessionId() {
+  if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+    return window.crypto.randomUUID();
+  }
+  return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function readLocalSessions() {
+  try {
+    return JSON.parse(localStorage.getItem(SESSIONS_STORAGE_KEY)) || [];
+  } catch (e) {
+    console.error('Error leyendo sesiones locales:', e);
+    return [];
+  }
+}
+
+function writeLocalSessions(sessions) {
+  localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
+}
+
+function saveSessionLocally(session) {
+  const sessions = readLocalSessions();
+  const existingIndex = sessions.findIndex(item => item.id === session.id);
+  if (existingIndex >= 0) {
+    sessions[existingIndex] = session;
+  } else {
+    sessions.push(session);
+  }
+  writeLocalSessions(sessions);
+}
+
+function getLocalSessionsForCurrentParkToday() {
+  const today = getTodayKey();
+  return readLocalSessions().filter(session => {
+    return session.parkId === currentPark.id && session.day === today;
+  });
+}
+
+function renderDailySummary(sessions) {
+  const countedSessions = sessions.filter(session => session.status !== 'replaced');
+  const activeSessions = countedSessions.filter(session => session.status === 'active');
+  const totalCash = countedSessions.reduce((sum, session) => sum + Number(session.price || 0), 0);
+
+  document.getElementById('today-count').textContent = countedSessions.length;
+  document.getElementById('today-cash').textContent = currencyFormatter.format(totalCash);
+  document.getElementById('active-count').textContent = activeSessions.length;
+}
+
+function updateDailySummaryFromLocal() {
+  if (!usingRemoteSummary) {
+    renderDailySummary(getLocalSessionsForCurrentParkToday());
+  }
+}
+
+function setFirebaseStatus(text, state = 'local') {
+  const statusEl = document.getElementById('firebase-status');
+  if (!statusEl) return;
+  statusEl.textContent = text;
+  statusEl.classList.toggle('online', state === 'online');
+  statusEl.classList.toggle('error', state === 'error');
+}
+
+function firebaseIsConfigured() {
+  return Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId && FIREBASE_CONFIG.appId);
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const existingScript = document.querySelector(`script[src="${src}"]`);
+    if (existingScript) {
+      resolve();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function initFirebase() {
+  if (!firebaseIsConfigured()) {
+    setFirebaseStatus('Local', 'local');
+    updateDailySummaryFromLocal();
+    return;
+  }
+
+  try {
+    await loadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-app-compat.js`);
+    await loadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-auth-compat.js`);
+    await loadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}/firebase-firestore-compat.js`);
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+
+    remoteDb = firebase.firestore();
+    firebaseAuth = firebase.auth();
+    await firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    firebaseAuth.onAuthStateChanged(user => {
+      if (user) {
+        hideAuthModal();
+        authModalDismissed = false;
+        setFirebaseStatus('Firebase', 'online');
+        watchRemoteDailySummary();
+      } else {
+        usingRemoteSummary = false;
+        stopRemoteDailySummary();
+        setFirebaseStatus('Login', 'error');
+        updateDailySummaryFromLocal();
+        if (!authModalDismissed) {
+          showAuthModal();
+        }
+      }
+    });
+  } catch (e) {
+    console.error('No se pudo iniciar Firebase:', e);
+    remoteDb = null;
+    firebaseAuth = null;
+    usingRemoteSummary = false;
+    setFirebaseStatus('Local', 'error');
+    updateDailySummaryFromLocal();
+  }
+}
+
+function sanitizeSessionForRemote(session) {
+  return JSON.parse(JSON.stringify(session));
+}
+
+async function writeSessionToRemote(session) {
+  if (!remoteDb || !firebaseAuth || !firebaseAuth.currentUser) return;
+
+  try {
+    await remoteDb.collection('sessions').doc(session.id).set({
+      ...sanitizeSessionForRemote(session),
+      updatedAtMs: Date.now(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch (e) {
+    console.error('No se pudo guardar la sesión en Firestore:', e);
+    setFirebaseStatus('Local', 'error');
+  }
+}
+
+function watchRemoteDailySummary() {
+  if (!remoteDb || !firebaseAuth || !firebaseAuth.currentUser) return;
+  stopRemoteDailySummary();
+
+  const today = getTodayKey();
+  usingRemoteSummary = true;
+  remoteSessionsUnsubscribe = remoteDb.collection('sessions')
+    .where('parkId', '==', currentPark.id)
+    .where('day', '==', today)
+    .onSnapshot(snapshot => {
+      const sessions = snapshot.docs.map(doc => doc.data());
+      renderDailySummary(sessions);
+      setFirebaseStatus('Firebase', 'online');
+    }, error => {
+      console.error('No se pudo leer el resumen remoto:', error);
+      usingRemoteSummary = false;
+      setFirebaseStatus('Local', 'error');
+      updateDailySummaryFromLocal();
+    });
+}
+
+function stopRemoteDailySummary() {
+  if (remoteSessionsUnsubscribe) {
+    remoteSessionsUnsubscribe();
+    remoteSessionsUnsubscribe = null;
+  }
+}
+
+function showAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function hideAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+function setupAuthControls() {
+  const emailInput = document.getElementById('auth-email');
+  const passwordInput = document.getElementById('auth-password');
+  const loginBtn = document.getElementById('auth-login-btn');
+  const localBtn = document.getElementById('auth-local-btn');
+  const errorEl = document.getElementById('auth-error');
+  const statusEl = document.getElementById('firebase-status');
+
+  async function submitLogin() {
+    if (!firebaseAuth) return;
+    errorEl.textContent = '';
+    loginBtn.disabled = true;
+
+    try {
+      await firebaseAuth.signInWithEmailAndPassword(emailInput.value.trim(), passwordInput.value);
+    } catch (e) {
+      console.error('No se pudo iniciar sesión:', e);
+      errorEl.textContent = 'No se pudo entrar';
+    } finally {
+      loginBtn.disabled = false;
+    }
+  }
+
+  loginBtn.onclick = submitLogin;
+  localBtn.onclick = () => {
+    authModalDismissed = true;
+    hideAuthModal();
+    setFirebaseStatus('Local', 'local');
+  };
+  statusEl.onclick = () => {
+    if (firebaseIsConfigured() && firebaseAuth && !firebaseAuth.currentUser) {
+      authModalDismissed = false;
+      showAuthModal();
+    }
+  };
+
+  [emailInput, passwordInput].forEach(input => {
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        void submitLogin();
+      }
+    });
+  });
+}
+
+function createJumpSession(timerId, durationSeconds) {
+  const now = Date.now();
+  const session = {
+    id: createSessionId(),
+    parkId: currentPark.id,
+    parkName: currentPark.name,
+    bedNumber: Number(timerId),
+    currentBedNumber: Number(timerId),
+    durationMinutes: getDurationMinutes(durationSeconds),
+    durationSeconds,
+    price: getPriceForDuration(durationSeconds),
+    day: getTodayKey(new Date(now)),
+    startedAtMs: now,
+    endedAtMs: null,
+    elapsedSeconds: 0,
+    overrunSeconds: 0,
+    status: 'active'
+  };
+
+  timers[timerId].activeSessionId = session.id;
+  timers[timerId].activeSessionSnapshot = session;
+  saveSessionLocally(session);
+  void writeSessionToRemote(session);
+  updateDailySummaryFromLocal();
+}
+
+function updateActiveSession(timerId, changes) {
+  const timer = timers[timerId];
+  if (!timer || !timer.activeSessionSnapshot) return;
+
+  timer.activeSessionSnapshot = {
+    ...timer.activeSessionSnapshot,
+    ...changes
+  };
+  saveSessionLocally(timer.activeSessionSnapshot);
+  void writeSessionToRemote(timer.activeSessionSnapshot);
+  updateDailySummaryFromLocal();
+}
+
+function updateActiveSessionDuration(timerId, durationSeconds) {
+  updateActiveSession(timerId, {
+    durationMinutes: getDurationMinutes(durationSeconds),
+    durationSeconds,
+    price: getPriceForDuration(durationSeconds)
+  });
+}
+
+function updateActiveSessionBed(timerId) {
+  updateActiveSession(timerId, {
+    currentBedNumber: Number(timerId)
+  });
+}
+
+function closeJumpSession(timerId, status = 'finished') {
+  const timer = timers[timerId];
+  if (!timer || !timer.activeSessionSnapshot) return;
+
+  const now = Date.now();
+  const startedAtMs = Number(timer.activeSessionSnapshot.startedAtMs || now);
+  const elapsedSeconds = Math.max(0, Math.floor((now - startedAtMs) / 1000));
+  const session = {
+    ...timer.activeSessionSnapshot,
+    currentBedNumber: Number(timerId),
+    endedAtMs: now,
+    elapsedSeconds,
+    overrunSeconds: Math.max(0, elapsedSeconds - Number(timer.activeSessionSnapshot.durationSeconds || 0)),
+    status
+  };
+
+  saveSessionLocally(session);
+  void writeSessionToRemote(session);
+  timer.activeSessionId = null;
+  timer.activeSessionSnapshot = null;
+  updateDailySummaryFromLocal();
+}
+
+function setupParkSelector() {
+  const select = document.getElementById('park-select');
+  select.innerHTML = '';
+
+  Object.values(APP_CONFIG.parks).forEach(park => {
+    const option = document.createElement('option');
+    option.value = park.id;
+    option.textContent = `${park.name} (${park.bedCount})`;
+    option.selected = park.id === currentPark.id;
+    select.appendChild(option);
+  });
+
+  select.onchange = () => {
+    switchPark(select.value);
+  };
+}
+
+function switchPark(parkId) {
+  const nextPark = APP_CONFIG.parks[parkId];
+  if (!nextPark || nextPark.id === currentPark.id) return;
+
+  Object.values(timers).forEach(timer => {
+    if (timer.interval) clearInterval(timer.interval);
+  });
+
+  currentPark = nextPark;
+  localStorage.setItem(PARK_STORAGE_KEY, currentPark.id);
+  const url = new URL(window.location.href);
+  url.searchParams.set('park', currentPark.id);
+  window.history.replaceState({}, '', url);
+  setupCurrentPark();
+
+  if (remoteDb) {
+    watchRemoteDailySummary();
+  }
+}
+
+function renderTimerGrid() {
+  const grid = document.getElementById('timer-grid');
+  grid.innerHTML = '';
+
+  if (currentPark.layout && currentPark.layout.type === 'horizontal-split') {
+    renderHorizontalSplitGrid(grid);
+    return;
+  }
+
+  renderVerticalSplitGrid(grid);
+}
+
+function renderVerticalSplitGrid(grid) {
+  const totalRows = Math.ceil(currentPark.bedCount / 2);
+  const topRows = Math.ceil(totalRows / 2);
+  const bottomRows = totalRows - topRows;
+  grid.style.gridTemplateColumns = '1fr max(0px, calc(4vw - 16px)) 1fr';
+  grid.style.gridTemplateRows = `repeat(${topRows}, 1fr) max(0px, calc(4vw - 16px)) repeat(${bottomRows}, 1fr)`;
+
+  for (let id = 1; id <= currentPark.bedCount; id++) {
+    const timerEl = document.createElement('div');
+    const baseRow = Math.ceil(id / 2);
+    timerEl.className = 'timer';
+    timerEl.dataset.timerId = String(id);
+    timerEl.style.gridColumn = id % 2 === 1 ? '1' : '3';
+    timerEl.style.gridRow = baseRow > topRows ? String(baseRow + 1) : String(baseRow);
+    grid.appendChild(timerEl);
+  }
+}
+
+function renderHorizontalSplitGrid(grid) {
+  const layout = currentPark.layout;
+  const gapTrack = 'max(0px, calc(4vw - 16px))';
+  const columnsBeforeGap = layout.columnSeparatorAfter;
+  const columnsAfterGap = layout.columns - columnsBeforeGap;
+  const rowsBeforeGap = layout.rowSeparatorAfter;
+  const rowsAfterGap = layout.rows - rowsBeforeGap;
+
+  grid.style.gridTemplateColumns = `repeat(${columnsBeforeGap}, 1fr) ${gapTrack} repeat(${columnsAfterGap}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${rowsBeforeGap}, 1fr) ${gapTrack} repeat(${rowsAfterGap}, 1fr)`;
+
+  for (let id = 1; id <= currentPark.bedCount; id++) {
+    const timerEl = document.createElement('div');
+    const zeroBased = id - 1;
+    const logicalColumn = (zeroBased % layout.columns) + 1;
+    const logicalRow = Math.floor(zeroBased / layout.columns) + 1;
+    timerEl.className = 'timer';
+    timerEl.dataset.timerId = String(id);
+    timerEl.style.gridColumn = logicalColumn > columnsBeforeGap ? String(logicalColumn + 1) : String(logicalColumn);
+    timerEl.style.gridRow = logicalRow > rowsBeforeGap ? String(logicalRow + 1) : String(logicalRow);
+    grid.appendChild(timerEl);
+  }
+}
+
+function initializeTimers() {
+  Object.keys(timers).forEach(id => delete timers[id]);
+
+  document.querySelectorAll('.timer').forEach(timerEl => {
+    timerEl.addEventListener('contextmenu', e => e.preventDefault());
+    const id = timerEl.dataset.timerId;
+    timers[id] = {
+      element: timerEl,
+      state: 'idle',
+      time: 600,
+      initialDuration: 600,
+      interval: null,
+      ascending: false,
+      pressTimerMedium: null,
+      pressTimerLong: null,
+      pressActionTaken: false,
+      lastClickTime: 0,
+      clickCount: 0,
+      doubleClickTimer: null,
+      startTime: null,
+      flashbackState: null,
+      isShowingFlashback: false,
+      activeSessionId: null,
+      activeSessionSnapshot: null
+    };
+    timerEl.addEventListener('mousedown', e => handlePressStart(e, id));
+    timerEl.addEventListener('mouseup', e => handlePressEnd(e, id));
+    timerEl.addEventListener('touchstart', e => handlePressStart(e, id));
+    timerEl.addEventListener('touchend', e => handlePressEnd(e, id));
+  });
+}
+
+function setupCurrentPark() {
+  renderTimerGrid();
+  initializeTimers();
+  loadTimersFromLocalStorage();
+  document.querySelectorAll('.timer').forEach(timerEl => {
+    const id = timerEl.dataset.timerId;
+    if (timers[id] && !timerEl.hasChildNodes()) {
+      updateTimerDisplay(id);
+    }
+  });
+  updateDailySummaryFromLocal();
 }
 
 function saveTimersToLocalStorage() {
@@ -495,7 +1217,7 @@ function saveTimersToLocalStorage() {
     if (timerCopy.flashbackState) {}
     timersToSave[id] = timerCopy;
   }
-  localStorage.setItem('timers', JSON.stringify(timersToSave));
+  localStorage.setItem(getTimersStorageKey(), JSON.stringify(timersToSave));
 }
 
 function loadTimersFromLocalStorage() {
@@ -512,6 +1234,14 @@ function loadTimersFromLocalStorage() {
   }
   
   if (!source) {
+      try {
+          source = JSON.parse(localStorage.getItem(getTimersStorageKey()));
+      } catch (e) {
+          console.error('Error al cargar temporizadores locales:', e);
+      }
+  }
+
+  if (!source && currentPark.id === APP_CONFIG.defaultParkId) {
       source = JSON.parse(localStorage.getItem('timers'));
   }
 
@@ -554,41 +1284,18 @@ function startTimerInterval(id) {
   updateTimer();
 }
 
-document.querySelectorAll('.timer').forEach(timerEl => {
-  timerEl.addEventListener('contextmenu', e => e.preventDefault());
-  const id = timerEl.dataset.timerId;
-  timers[id] = {
-    element: timerEl,
-    state: 'idle',
-    time: 600,
-    initialDuration: 600,
-    interval: null,
-    ascending: false,
-    pressTimerMedium: null,
-    pressTimerLong: null,
-    pressActionTaken: false,
-    lastClickTime: 0,
-    clickCount: 0,
-    doubleClickTimer: null,
-    startTime: null,
-    flashbackState: null,
-    isShowingFlashback: false
-  };
-  timerEl.addEventListener('mousedown', e => handlePressStart(e, id));
-  timerEl.addEventListener('mouseup', e => handlePressEnd(e, id));
-  timerEl.addEventListener('touchstart', e => handlePressStart(e, id));
-  timerEl.addEventListener('touchend', e => handlePressEnd(e, id));
-});
+function bootApp() {
+    setupParkSelector();
+    setupAuthControls();
+    setupCurrentPark();
+    void initFirebase();
+}
 
-window.onload = () => {
-    loadTimersFromLocalStorage();
-    document.querySelectorAll('.timer').forEach(timerEl => {
-        const id = timerEl.dataset.timerId;
-        if(timers[id] && !timerEl.hasChildNodes()){
-            updateTimerDisplay(id);
-        }
-    });
-};
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootApp);
+} else {
+    bootApp();
+}
 
 // ===================================================================
 // ========= INICIO DE LA SECCIÓN MODIFICADA =========================
@@ -703,6 +1410,9 @@ function handlePressEnd(e, id) {
 
 function startTimer(id, duration) {
   const timer = timers[id];
+  if (timer.activeSessionId && timer.state === 'counting') {
+    closeJumpSession(id, 'replaced');
+  }
   if (timer.interval) clearInterval(timer.interval);
   timer.time = duration;
   timer.initialDuration = duration;
@@ -710,12 +1420,17 @@ function startTimer(id, duration) {
   timer.ascending = false;
   timer.state = 'counting';
   timer.isShowingFlashback = false;
+  createJumpSession(id, duration);
   updateTimerDisplay(id);
   startTimerInterval(id);
+  saveTimersToLocalStorage();
 }
 
 function resetTimer(id, duration) {
   const timer = timers[id];
+  if (timer.activeSessionId && timer.state === 'counting') {
+    closeJumpSession(id, 'finished');
+  }
   if (timer.interval) clearInterval(timer.interval);
   timer.initialDuration = duration;
   timer.startTime = Date.now();
@@ -746,6 +1461,7 @@ function setDuration(id, newDuration) {
     timer.time = Math.abs(remaining) + 1; // mantenemos tu +1
   }
 
+  updateActiveSessionDuration(id, newDuration);
   updateTimerDisplay(id);
   saveTimersToLocalStorage();
 }
@@ -817,13 +1533,15 @@ function cancelSwapMode() {
 function completeSwap(sourceId, targetId) {
   const timerA = timers[sourceId];
   const timerB = timers[targetId];
-  const properties = ["state", "time", "initialDuration", "ascending", "startTime", "lastClickTime", "flashbackState", "isShowingFlashback"];
+  const properties = ["state", "time", "initialDuration", "ascending", "startTime", "lastClickTime", "flashbackState", "isShowingFlashback", "activeSessionId", "activeSessionSnapshot"];
   for (let prop of properties) {
     [timerA[prop], timerB[prop]] = [timerB[prop], timerA[prop]];
   }
   if (timerA.interval) clearInterval(timerA.interval);
   if (timerB.interval) clearInterval(timerB.interval);
   
+  updateActiveSessionBed(sourceId);
+  updateActiveSessionBed(targetId);
   updateTimerDisplay(sourceId);
   updateTimerDisplay(targetId);
   
