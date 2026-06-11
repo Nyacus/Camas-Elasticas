@@ -1130,7 +1130,8 @@ const APP_CONFIG = {
       bedCount: 12,
       prices: { 10: 3, 20: 4, 30: 5 },
       layout: {
-        type: 'vertical-split'
+        type: 'vertical-split',
+        numbering: 'bottom-up'
       }
     },
     'parque-2': {
@@ -1990,10 +1991,13 @@ function renderVerticalSplitGrid(grid) {
   for (let id = 1; id <= currentPark.bedCount; id++) {
     const timerEl = document.createElement('div');
     const baseRow = Math.ceil(id / 2);
+    const physicalRow = currentPark.layout && currentPark.layout.numbering === 'bottom-up'
+      ? totalRows - baseRow + 1
+      : baseRow;
     timerEl.className = 'timer';
     timerEl.dataset.timerId = String(id);
     timerEl.style.gridColumn = id % 2 === 1 ? '1' : '3';
-    timerEl.style.gridRow = baseRow > topRows ? String(baseRow + 1) : String(baseRow);
+    timerEl.style.gridRow = physicalRow > topRows ? String(physicalRow + 1) : String(physicalRow);
     grid.appendChild(timerEl);
   }
 }
