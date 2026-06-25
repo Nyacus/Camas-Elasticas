@@ -217,6 +217,35 @@
     flex-wrap: wrap;
     justify-content: flex-end;
   }
+  .manager-date-control {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid #D7DCE3;
+    border-radius: 10px;
+    background: #fff;
+    color: #4B5563;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+  }
+  .manager-date-control i {
+    color: #2563EB;
+  }
+  .manager-date-control label {
+    font-size: 0.82rem;
+    font-weight: 900;
+  }
+  #manager-date-select {
+    min-height: 28px;
+    border: 0;
+    background: transparent;
+    color: #111827;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 900;
+    outline: none;
+  }
   .manager-status {
     min-height: 42px;
     display: inline-flex;
@@ -922,7 +951,8 @@
       justify-content: stretch;
     }
     .manager-status,
-    .manager-button {
+    .manager-button,
+    .manager-date-control {
       flex: 1 1 auto;
       justify-content: center;
     }
@@ -1070,6 +1100,11 @@
         <p id="manager-date">Hoy</p>
       </div>
       <div class="manager-actions">
+        <div class="manager-date-control">
+          <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+          <label for="manager-date-select">Fecha</label>
+          <input type="date" id="manager-date-select">
+        </div>
         <div class="manager-status" id="manager-status">
           <i class="fa-solid fa-circle-info"></i>
           <span>Conectando</span>
@@ -1247,7 +1282,8 @@ const SESSIONS_STORAGE_KEY = 'jumpSessions';
 const MIN_COUNTABLE_SESSION_SECONDS = 60;
 const PASSAGE_TRACK = 'max(1.2px, calc(4.4vw - 16.4px))';
 const isManagementView = isManagementRoute(window.location.pathname, window.location.search);
-const isParkEntryView = isParkEntryRoute(window.location.pathname);
+const isParkEntryView = !isManagementView && isParkEntryRoute(window.location.pathname);
+let managementSelectedDateKey = getInitialManagementDateKey();
 let currentPark = getInitialPark();
 let remoteDb = null;
 let firebaseAuth = null;
@@ -1289,6 +1325,20 @@ function isManagementRoute(pathname, search = '') {
 function isParkEntryRoute(pathname) {
   const path = normalizePath(pathname);
   return path === '/' || path === '/index.html';
+}
+
+function isValidDateKey(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year
+    && date.getUTCMonth() + 1 === month
+    && date.getUTCDate() === day;
+}
+
+function getInitialManagementDateKey() {
+  const requestedDate = new URLSearchParams(window.location.search).get('date');
+  return isValidDateKey(requestedDate) ? requestedDate : getTodayKey();
 }
 
 function getParkIdFromPath(pathname) {
@@ -1364,6 +1414,27 @@ function createDateInTimeZone(year, month, day, hour, minute = 0, second = 0, mi
   const firstPass = new Date(utcGuess.getTime() - firstOffset);
   const finalOffset = getTimeZoneOffsetMs(firstPass, timeZone);
   return new Date(utcGuess.getTime() - finalOffset);
+}
+
+function getManagementWindowForDateKey(dateKey) {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const selectedDayUtc = Date.UTC(year, month - 1, day);
+  const followingDay = new Date(selectedDayUtc + (24 * 60 * 60 * 1000));
+  const start = createDateInTimeZone(year, month, day, 17);
+  const end = createDateInTimeZone(
+    followingDay.getUTCFullYear(),
+    followingDay.getUTCMonth() + 1,
+    followingDay.getUTCDate(),
+    3
+  );
+
+  return {
+    dateKey,
+    startMs: start.getTime(),
+    endMs: end.getTime(),
+    start,
+    end
+  };
 }
 
 function getManagementWindow(date = new Date()) {
@@ -1658,7 +1729,7 @@ function renderRecentActivity(sessions) {
   }).join('');
 }
 
-function renderManagementDashboard(sessions = [], windowRange = getManagementWindow()) {
+function renderManagementDashboard(sessions = [], windowRange = getManagementWindowForDateKey(managementSelectedDateKey)) {
   const countedSessions = getCountedSessions(sessions);
   const activeSessions = getActiveSessions(sessions);
   const totalCash = getSessionsCash(sessions);
@@ -1701,7 +1772,7 @@ function watchManagementSessions() {
   if (!remoteDb || !firebaseAuth || !firebaseAuth.currentUser) return;
   stopManagementPanel();
 
-  const managementWindow = getManagementWindow();
+  const managementWindow = getManagementWindowForDateKey(managementSelectedDateKey);
   managementCurrentWindow = managementWindow;
   setManagerStatus('Firebase conectado', 'online');
   renderManagementDashboard([], managementWindow);
@@ -1727,8 +1798,32 @@ function watchManagementSessions() {
 }
 
 function setupManagementControls() {
+  const dateInput = document.getElementById('manager-date-select');
   const refreshBtn = document.getElementById('manager-refresh-btn');
   const logoutBtn = document.getElementById('manager-logout-btn');
+
+  if (dateInput) {
+    dateInput.value = managementSelectedDateKey;
+    dateInput.max = getTodayKey();
+    dateInput.onchange = () => {
+      if (!isValidDateKey(dateInput.value)) return;
+
+      managementSelectedDateKey = dateInput.value;
+      const url = new URL(window.location.href);
+      if (managementSelectedDateKey === getTodayKey()) {
+        url.searchParams.delete('date');
+      } else {
+        url.searchParams.set('date', managementSelectedDateKey);
+      }
+      window.history.replaceState({}, '', url);
+
+      if (firebaseAuth && firebaseAuth.currentUser) {
+        watchManagementSessions();
+      } else {
+        renderManagementDashboard([], getManagementWindowForDateKey(managementSelectedDateKey));
+      }
+    };
+  }
 
   if (refreshBtn) {
     refreshBtn.onclick = () => {
