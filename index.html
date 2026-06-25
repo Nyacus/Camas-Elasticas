@@ -451,8 +451,8 @@
   }
   .grid-container {
     display: grid;
-    grid-template-columns: 1fr max(0px, calc(4vw - 16px)) 1fr;
-    grid-template-rows: repeat(3, 1fr) max(0px, calc(4vw - 16px)) repeat(3, 1fr);
+    grid-template-columns: 1fr max(1.2px, calc(4.4vw - 16.4px)) 1fr;
+    grid-template-rows: repeat(3, 1fr) max(1.2px, calc(4.4vw - 16.4px)) repeat(3, 1fr);
     flex: 1 1 auto;
     min-height: 0;
     height: auto;
@@ -1220,7 +1220,8 @@ const APP_CONFIG = {
       prices: { 10: 3, 20: 4, 30: 5 },
       layout: {
         type: 'vertical-split',
-        numbering: 'bottom-up'
+        numbering: 'bottom-up',
+        rowSeparatorAfter: 3
       }
     },
     'parque-2': {
@@ -1229,7 +1230,9 @@ const APP_CONFIG = {
       bedCount: 10,
       prices: { 10: 3, 20: 4, 30: 5 },
       layout: {
-        type: 'vertical-split'
+        type: 'vertical-split',
+        numbering: 'bottom-up',
+        rowSeparatorAfter: 2
       }
     }
   }
@@ -1242,6 +1245,7 @@ const MANAGEMENT_PATH = '/gestion';
 const PARK_STORAGE_KEY = 'selectedParkId';
 const SESSIONS_STORAGE_KEY = 'jumpSessions';
 const MIN_COUNTABLE_SESSION_SECONDS = 60;
+const PASSAGE_TRACK = 'max(1.2px, calc(4.4vw - 16.4px))';
 const isManagementView = isManagementRoute(window.location.pathname, window.location.search);
 const isParkEntryView = isParkEntryRoute(window.location.pathname);
 let currentPark = getInitialPark();
@@ -2073,29 +2077,30 @@ function renderTimerGrid() {
 }
 
 function renderVerticalSplitGrid(grid) {
+  const layout = currentPark.layout || {};
   const totalRows = Math.ceil(currentPark.bedCount / 2);
-  const topRows = Math.ceil(totalRows / 2);
-  const bottomRows = totalRows - topRows;
-  grid.style.gridTemplateColumns = '1fr max(0px, calc(4vw - 16px)) 1fr';
-  grid.style.gridTemplateRows = `repeat(${topRows}, 1fr) max(0px, calc(4vw - 16px)) repeat(${bottomRows}, 1fr)`;
+  const rowsBeforeGap = Number(layout.rowSeparatorAfter || Math.ceil(totalRows / 2));
+  const rowsAfterGap = totalRows - rowsBeforeGap;
+  grid.style.gridTemplateColumns = `1fr ${PASSAGE_TRACK} 1fr`;
+  grid.style.gridTemplateRows = `repeat(${rowsBeforeGap}, 1fr) ${PASSAGE_TRACK} repeat(${rowsAfterGap}, 1fr)`;
 
   for (let id = 1; id <= currentPark.bedCount; id++) {
     const timerEl = document.createElement('div');
     const baseRow = Math.ceil(id / 2);
-    const physicalRow = currentPark.layout && currentPark.layout.numbering === 'bottom-up'
+    const physicalRow = layout.numbering === 'bottom-up'
       ? totalRows - baseRow + 1
       : baseRow;
     timerEl.className = 'timer';
     timerEl.dataset.timerId = String(id);
     timerEl.style.gridColumn = id % 2 === 1 ? '1' : '3';
-    timerEl.style.gridRow = physicalRow > topRows ? String(physicalRow + 1) : String(physicalRow);
+    timerEl.style.gridRow = physicalRow > rowsBeforeGap ? String(physicalRow + 1) : String(physicalRow);
     grid.appendChild(timerEl);
   }
 }
 
 function renderHorizontalSplitGrid(grid) {
   const layout = currentPark.layout;
-  const gapTrack = 'max(0px, calc(4vw - 16px))';
+  const gapTrack = PASSAGE_TRACK;
   const columnsBeforeGap = layout.columnSeparatorAfter;
   const columnsAfterGap = layout.columns - columnsBeforeGap;
   const rowsBeforeGap = layout.rowSeparatorAfter;
